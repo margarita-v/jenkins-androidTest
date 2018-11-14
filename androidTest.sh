@@ -1,48 +1,7 @@
 #!/bin/bash
 set -e
 
-: '
-    Функция, возвращающая список имен APK-файлов с заданным суффиксом,
-    который передается параметром.
-'
-get_apk_list() {
-    grep -r --include "*-$1.apk" . | cut -d ' ' -f3
-}
-
-print_line() {
-    echo _____________________________________________________________________
-    echo
-}
-
-print_elements() {
-    print_line
-    for word in $@
-    do
-        echo ${word}
-    done
-    echo
-    SIZE=`echo $@ | wc -w`
-    echo ${SIZE} elements
-    print_line
-}
-
-print() {
-    echo
-    echo $1
-    echo
-}
-
-push() {
-    adb push $1 $2
-}
-
-install_apk() {
-    adb shell pm install -t -r $1
-}
-
-get_emulator_name() {
-    return `adb devices | grep emulator | cut -f1`
-}
+. ./utils.sh --source-only
 
 # BUILD APK FOR INSTRUMENTAL TESTS
 

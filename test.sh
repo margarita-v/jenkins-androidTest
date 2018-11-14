@@ -1,56 +1,7 @@
 #!/bin/bash
 set -e
 
-: '
-    Функция, возвращающая список имен APK-файлов с заданным суффиксом,
-    который передается параметром.
-'
-get_apk_list() {
-    grep -r --include "*-$1.apk" . | cut -d ' ' -f3
-}
-
-print_line() {
-    echo _____________________________________________________________________
-    echo
-}
-
-print_elements() {
-    print_line
-    for word in $@
-    do
-        echo ${word}
-    done
-    echo
-    SIZE=`echo $@ | wc -w`
-    echo ${SIZE} elements
-    print_line
-}
-
-print() {
-    echo
-    echo $1
-    echo
-}
-
-get_class_names() {
-    RESULT=""
-    for word in $@
-    do
-        RESULT+=`echo ${word} | rev | cut -d '/' -f1 | rev | cut -d '.' -f1`
-        RESULT+=' '
-    done
-    echo ${RESULT}
-}
-
-get_test_packages() {
-    RESULT=""
-    for word in $@
-    do
-        RESULT+=`head -n 1 ${word} | cut -d ' ' -f2`
-        RESULT+=' '
-    done
-    echo ${RESULT}
-}
+. ./utils.sh --source-only
 
 cd ..
 
