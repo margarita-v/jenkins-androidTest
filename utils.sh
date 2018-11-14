@@ -1,11 +1,13 @@
 #!/bin/bash
 
+ANDROID_MANIFEST_FILE_NAME="AndroidManifest.xml"
+
 get_apk_list() {
     : '
         Функция, возвращающая список имен APK-файлов с заданным суффиксом,
         который передается параметром.
     '
-    grep -r --include "*-$1.apk" . | cut -d ' ' -f3
+    grep -r --include "*-$1.apk" . | cut -d ' ' -f3 | grep sample
 }
 
 print_line() {
@@ -64,7 +66,6 @@ get_test_packages() {
 }
 
 get_manifests() {
-    ANDROID_MANIFEST_FILE_NAME="AndroidManifest.xml"
     find . -name "*${ANDROID_MANIFEST_FILE_NAME}" | grep "src/main/${ANDROID_MANIFEST_FILE_NAME}$"
 }
 
@@ -72,5 +73,21 @@ get_test_packages_new() {
     #todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #todo remove checking for template
     #todo remove checking for samples
-    get_manifests | grep -v template | grep sample | xargs cat | grep "package=" | cut -d '"' -f2
+    get_manifests | grep sample | xargs cat | grep "package=" | cut -d '"' -f2
+}
+
+get_manifest_suffix_length() {
+    echo ${ANDROID_MANIFEST_FILE_NAME} | wc -m
+}
+
+get_manifests_folders_names() {
+    INPUT=`get_manifests | grep sample | grep -v sample-common | grep -v sample-dagger | cut -c 3-`
+    RESULT=""
+    LENGTH=`get_manifest_suffix_length`
+    for word in ${INPUT}
+    do
+        RESULT+=${word::-${LENGTH}}
+        RESULT+=' '
+    done
+    echo ${RESULT}
 }
