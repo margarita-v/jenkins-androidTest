@@ -70,10 +70,7 @@ get_manifests() {
 }
 
 get_test_packages_new() {
-    #todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #todo remove checking for template
-    #todo remove checking for samples
-    get_manifests | grep sample | xargs cat | grep "package=" | cut -d '"' -f2
+    get_manifests | xargs cat | grep "package=" | cut -d '"' -f2
 }
 
 get_manifest_suffix_length() {
@@ -88,6 +85,28 @@ get_manifests_folders_names() {
     do
         RESULT+=${word::-${LENGTH}}
         RESULT+=' '
+    done
+    echo ${RESULT}
+}
+
+get_apk_folder_names() {
+    RESULT=""
+    for word in $@
+    do
+        RESULT+=`echo ${word} | grep -v sample.common | grep -v sample.dagger | cut -d '/' -f1`
+        RESULT+=' '
+    done
+    echo ${RESULT}
+}
+
+get_test_packages_for_apks() {
+    RESULT=""
+    for word in $@
+    do
+        cd ${word}
+        RESULT+=`get_test_packages_new`
+        RESULT+=' '
+        cd ..
     done
     echo ${RESULT}
 }
