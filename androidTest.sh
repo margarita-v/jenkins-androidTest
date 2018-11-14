@@ -9,9 +9,26 @@ get_apk_list() {
     grep -r --include "*-$1.apk" . | cut -d ' ' -f3
 }
 
-print() {
-    echo $1
+print_line() {
+    echo _____________________________________________________________________
     echo
+}
+
+print_elements() {
+    print_line
+    for word in $@
+    do
+        echo ${word}
+    done
+    echo
+    SIZE=`echo $@ | wc -w`
+    echo ${SIZE} elements
+    print_line
+}
+
+print() {
+    echo
+    echo $1
     echo
 }
 
@@ -39,20 +56,25 @@ print "Project location ${PROJECT_LOCATION}"
 #todo uncoment
 #./gradlew assembleAndroidTest
 
+print ANDROID_TEST_APK_LIST
 ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
-print ${ANDROID_TEST_APK_LIST}
+print_elements ${ANDROID_TEST_APK_LIST}
 
+print DEBUG_APK_LIST
 DEBUG_APK_LIST=`get_apk_list "debug"`
-print ${DEBUG_APK_LIST}
+print_elements ${DEBUG_APK_LIST}
 
+print ANDROID_TEST_CLASSES
 ANDROID_TEST_CLASSES=`find . -name *AndroidTest.kt`
-print ${ANDROID_TEST_CLASSES}
+print_elements ${ANDROID_TEST_CLASSES}
 
+print ANDROID_TEST_CLASS_NAME
 ANDROID_TEST_CLASS_NAME=`echo ${ANDROID_TEST_CLASSES} | rev | cut -d '/' -f1 | rev | cut -d '.' -f1`
-print ${ANDROID_TEST_CLASS_NAME}
+print_elements ${ANDROID_TEST_CLASS_NAME}
 
+print ANDROID_TEST_PACKAGE_NAME
 ANDROID_TEST_PACKAGE_NAME=`head -n 1 ${ANDROID_TEST_CLASSES} | cut -d ' ' -f2`
-print ${ANDROID_TEST_PACKAGE_NAME}
+print_elements ${ANDROID_TEST_PACKAGE_NAME}
 
 TMP_PACKAGE_NAME=/data/local/tmp/
 ANDROID_JUNIT_RUNNER_NAME="androidx.test.runner.AndroidJUnitRunner"
@@ -73,8 +95,6 @@ if [[ -z "$EMULATOR_NAME" ]]; then
     # launch emulator in another terminal window
     #todo add `adb -s $name shell ...`
     gnome-terminal -e "emulator -avd "$avd_name" -skin "$scin_size" -no-snapshot-save"
-
-    adb wait-for-device
 
     adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 
