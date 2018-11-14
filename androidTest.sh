@@ -1,16 +1,16 @@
 #!/bin/bash
+set -e
 
-'''
+: '
     Функция, возвращающая список имен APK-файлов с заданным суффиксом,
     который передается параметром.
-'''
+'
 get_apk_list() {
     grep -r --include "*-$1.apk" . | cut -d ' ' -f3
 }
 
 print() {
     echo $1
-    echo
     echo
     echo
 }
@@ -23,14 +23,28 @@ install_apk() {
     adb shell pm install -t -r $1
 }
 
-# build APK for instrumental tests
-#todo cd to project directory
-#./gradlew assembleAndroidTest
-#ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
-#print $ANDROID_TEST_APK_LIST
-#DEBUG_APK_LIST=`get_apk_list "debug"`
-#print $DEBUG_APK_LIST
+# BUILD APK FOR INSTRUMENTAL TESTS
 
+# Script location: android-standard/ci-shell-scripts
+cd ..
+#./gradlew assembleAndroidTest
+
+ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
+print ${ANDROID_TEST_APK_LIST}
+
+DEBUG_APK_LIST=`get_apk_list "debug"`
+print ${DEBUG_APK_LIST}
+
+ANDROID_TEST_CLASSES=`find . -name *AndroidTest.kt`
+print ${ANDROID_TEST_CLASSES}
+
+ANDROID_TEST_CLASS_NAME=`echo ${ANDROID_TEST_CLASSES} | rev | cut -d '/' -f1 | rev | cut -d '.' -f1`
+print ${ANDROID_TEST_CLASS_NAME}
+
+ANDROID_TEST_PACKAGE_NAME=`head -n 1 ${ANDROID_TEST_CLASSES} | cut -d ' ' -f2`
+print ${ANDROID_TEST_PACKAGE_NAME}
+
+TMP_PACKAGE_NAME=/data/local/tmp/
 ANDROID_JUNIT_RUNNER_NAME="androidx.test.runner.AndroidJUnitRunner"
 
 # check if the emulator is running
@@ -48,14 +62,16 @@ if [[ -z "$EMULATOR_STATUS" ]]; then
     gnome-terminal -e "emulator -avd "$avd_name" -skin "$scin_size" -no-snapshot-save"
     adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 
-    #todo try to change /data/local/tmp/... to custom package
-    push /home/volodina/AndroidStudioProjects/android-standard/app-migration-sample/build/outputs/apk/debug/app-migration-sample-debug.apk /data/local/tmp/ru.surfstudio.android.app.migration.sample
-    install_apk "/data/local/tmp/ru.surfstudio.android.app.migration.sample"
+    APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${ANDROID_TEST_PACKAGE_NAME}
+    TEST_APK_PACKAGE_NAME=${APK_PACKAGE_NAME}.test
 
-    push /home/volodina/AndroidStudioProjects/android-standard/app-migration-sample/build/outputs/apk/androidTest/debug/app-migration-sample-debug-androidTest.apk /data/local/tmp/ru.surfstudio.android.app.migration.sample.test
-    install_apk "/data/local/tmp/ru.surfstudio.android.app.migration.sample.test"
+    push ${DEBUG_APK_LIST} ${APK_PACKAGE_NAME}
+    install_apk ${APK_PACKAGE_NAME}
 
-    adb shell am instrument -w -r -e debug false -e class 'ru.surfstudio.android.app.migration.sample.AppMigrationSampleTest' ru.surfstudio.android.app.migration.sample.test/"$ANDROID_JUNIT_RUNNER_NAME"
+    push ${ANDROID_TEST_APK_LIST} ${TEST_APK_PACKAGE_NAME}
+    install_apk ${TEST_APK_PACKAGE_NAME}
+
+    adb shell am instrument -w -r -e debug false -e class "${ANDROID_TEST_PACKAGE_NAME}.${ANDROID_TEST_CLASS_NAME}" ${ANDROID_TEST_PACKAGE_NAME}.test/"$ANDROID_JUNIT_RUNNER_NAME"
     #todo close emulator
 else
     echo Emulator is running
