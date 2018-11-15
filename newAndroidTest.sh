@@ -60,7 +60,7 @@ if [[ -z "$EMULATOR_NAME" ]]; then
         push "${PROJECT_LOCATION}${DEBUG_APK_NAME}" ${DEBUG_APK_PACKAGE_NAME}
         install_apk ${DEBUG_APK_PACKAGE_NAME}
 
-        push "${PROJECT_LOCATION}${ANDROID_TEST_APK_LIST}" ${TEST_APK_PACKAGE_NAME}
+        push "${PROJECT_LOCATION}${androidTestApk}" ${TEST_APK_PACKAGE_NAME}
         install_apk ${TEST_APK_PACKAGE_NAME}
 
         adb shell am instrument -w -r -e debug false ${TEST_PACKAGE_NAME}/"$ANDROID_JUNIT_RUNNER_NAME"
