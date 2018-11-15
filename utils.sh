@@ -110,3 +110,19 @@ get_test_packages_for_apks() {
     done
     echo ${RESULT}
 }
+
+get_debug_apks() {
+    RESULT=""
+    for word in $@
+    do
+        cd ${word}
+        RESULT+=`get_apk_list "debug"`
+        RESULT+=' '
+        cd ..
+    done
+    echo ${RESULT}
+}
+
+get_length() {
+    echo $1 | wc -m
+}
