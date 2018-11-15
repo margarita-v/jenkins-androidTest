@@ -7,8 +7,7 @@ set -e
 # BUILD APK FOR INSTRUMENTAL TESTS
 
 #todo uncoment
-#todo cd .. for ./gradlew
-#./gradlew clean assembleDebug assembleAndroidTest
+#./gradlew assembleAndroidTest
 
 TMP_PACKAGE_NAME=/data/local/tmp/
 ANDROID_JUNIT_RUNNER_NAME="androidx.test.runner.AndroidJUnitRunner"

@@ -6,7 +6,7 @@ cd ..
 
 #./gradlew clean assembleDebug assembleAndroidTest
 
-ANDROID_TEST_APK_LIST=`get_apk_list "androidTest" | grep -v sample-dagger | grep -v sample-common`
+ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
 
 for androidTestApk in ${ANDROID_TEST_APK_LIST}
 do
@@ -17,18 +17,23 @@ do
 
     # find debug apk and test package name
     cd ${ANDROID_TEST_APK_FOLDER}
-    echo ${ANDROID_TEST_APK_FOLDER}
 
-    DEBUG_APK_NAME=${ANDROID_TEST_APK_FOLDER}/`get_apk_list "debug"`
-    echo ${DEBUG_APK_NAME}
-    cd ..
+    APK_NAME=`get_apk_list "debug"`
 
-    TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
-    echo ${TEST_PACKAGE_NAME}
+    # check if debug apk exists
+    if ! [[ -z ${APK_NAME} ]]; then
+        DEBUG_APK_NAME=${ANDROID_TEST_APK_FOLDER}/${APK_NAME}
+        echo debug ${DEBUG_APK_NAME}
+        cd ..
 
-    DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
-    echo ${DEBUG_PACKAGE_NAME}
+        TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
+        echo ${TEST_PACKAGE_NAME}
 
+        DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
+        echo ${DEBUG_PACKAGE_NAME}
+    else
+        cd ..
+    fi
     print_line
 done
 
