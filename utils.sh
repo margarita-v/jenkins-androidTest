@@ -126,3 +126,7 @@ get_debug_apks() {
 get_length() {
     echo $1 | wc -m
 }
+
+get_package_name_from_apk() {
+    aapt dump xmltree $1 ${ANDROID_MANIFEST_FILE_NAME} | grep package | cut -d '"' -f2
+}

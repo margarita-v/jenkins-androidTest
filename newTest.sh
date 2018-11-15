@@ -6,47 +6,31 @@ cd ..
 
 #./gradlew clean assembleDebug assembleAndroidTest
 
-#print ANDROID_TEST_PACKAGES
-#ANDROID_TEST_PACKAGES=`get_test_packages_new | grep -v sample.common | grep -v sample.dagger`
-#print_elements ${ANDROID_TEST_PACKAGES}
-
-print ANDROID_TEST_APK_LIST
-ANDROID_TEST_APK_LIST=`get_apk_list "androidTest" | grep -v sample-common | grep -v sample-dagger`
-print_elements ${ANDROID_TEST_APK_LIST}
-
-print ANDROID_TEST_APK_FOLDER_NAMES
-ANDROID_TEST_APK_FOLDER_NAMES=`get_apk_folder_names ${ANDROID_TEST_APK_LIST}`
-print_elements ${ANDROID_TEST_APK_FOLDER_NAMES}
-
-print_line
+ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
 
 for androidTestApk in ${ANDROID_TEST_APK_LIST}
 do
-    ANDROID_TEST_APK_FOLDER=`get_apk_folder_names ${androidTestApk}`
+    echo ${androidTestApk}
 
+    ANDROID_TEST_APK_FOLDER=`get_apk_folder_names ${androidTestApk}`
     ANDROID_TEST_APK_FILE_NAME=`echo ${androidTestApk} | rev | cut -d '/' -f1 | rev`
-    #ANDROID_TEST_MANIFEST_FOLDER=`dirname ${androidTestApk}`
 
     # find debug apk and test package name
     cd ${ANDROID_TEST_APK_FOLDER}
     echo ${ANDROID_TEST_APK_FOLDER}
 
-    TEST_PACKAGE_NAME=`get_test_packages_new`.test
-    echo ${TEST_PACKAGE_NAME}
-
     DEBUG_APK_NAME=${ANDROID_TEST_APK_FOLDER}/`get_apk_list "debug"`
     echo ${DEBUG_APK_NAME}
     cd ..
 
-    # find test package name
-    #cd ${ANDROID_TEST_MANIFEST_FOLDER}
-    #echo ${ANDROID_TEST_MANIFEST_FOLDER}
+    TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
+    echo ${TEST_PACKAGE_NAME}
 
-    #yes | unzip ${ANDROID_TEST_APK_FILE_NAME}
-    #cat ${ANDROID_MANIFEST_FILE_NAME}
+    DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
+    echo ${DEBUG_PACKAGE_NAME}
+
+    print_line
 done
-
-print_line
 
 #print ANDROID_TEST_PACKAGES
 #ANDROID_TEST_PACKAGES=`get_test_packages_for_apks ${ANDROID_TEST_APK_FOLDER_NAMES}`

@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+#todo close emulator on error
 
 . ./utils.sh --source-only
 
@@ -32,30 +33,29 @@ if [[ -z "$EMULATOR_NAME" ]]; then
     PROJECT_LOCATION="`pwd`/"
     print "Project location ${PROJECT_LOCATION}"
 
-    print ANDROID_TEST_APK_LIST
-    ANDROID_TEST_APK_LIST=`get_apk_list "androidTest" | grep -v sample-common | grep -v sample-dagger`
-    print_elements ${ANDROID_TEST_APK_LIST}
+    ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
 
-    print ANDROID_TEST_APK_FOLDER_NAMES
-    ANDROID_TEST_APK_FOLDER_NAMES=`get_apk_folder_names ${ANDROID_TEST_APK_LIST}`
-    print_elements ${ANDROID_TEST_APK_FOLDER_NAMES}
-
-    print_line
-
-    for folder in ${ANDROID_TEST_APK_FOLDER_NAMES}
+    for androidTestApk in ${ANDROID_TEST_APK_LIST}
     do
+        print ${androidTestApk}
+
+        ANDROID_TEST_APK_FOLDER=`get_apk_folder_names ${androidTestApk}`
+        ANDROID_TEST_APK_FILE_NAME=`echo ${androidTestApk} | rev | cut -d '/' -f1 | rev`
+
         # find debug apk and test package name
-        cd ${folder}
-        echo ${folder}
+        cd ${ANDROID_TEST_APK_FOLDER}
+        #todo find all debug apks which are started with ANDROID_TEST_APK_FOLDER
+        DEBUG_APK_NAME=${ANDROID_TEST_APK_FOLDER}/`get_apk_list "debug"`
+        cd ..
 
-        TEST_PACKAGE_NAME=`get_test_packages_new`
-        echo ${TEST_PACKAGE_NAME}
+        TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
+        print ${TEST_PACKAGE_NAME}
 
-        DEBUG_APK_NAME=${folder}/`get_apk_list "debug"`
-        echo ${DEBUG_APK_NAME}
+        DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
+        print ${DEBUG_PACKAGE_NAME}
 
-        DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
-        TEST_APK_PACKAGE_NAME=${DEBUG_APK_PACKAGE_NAME}.test
+        DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
+        TEST_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
 
         push "${PROJECT_LOCATION}${DEBUG_APK_NAME}" ${DEBUG_APK_PACKAGE_NAME}
         install_apk ${DEBUG_APK_PACKAGE_NAME}
@@ -63,12 +63,10 @@ if [[ -z "$EMULATOR_NAME" ]]; then
         push "${PROJECT_LOCATION}${ANDROID_TEST_APK_LIST}" ${TEST_APK_PACKAGE_NAME}
         install_apk ${TEST_APK_PACKAGE_NAME}
 
-        adb shell am instrument -w -r -e debug false ${TEST_PACKAGE_NAME}.test/"$ANDROID_JUNIT_RUNNER_NAME"
+        adb shell am instrument -w -r -e debug false ${TEST_PACKAGE_NAME}/"$ANDROID_JUNIT_RUNNER_NAME"
 
-        cd ..
+        print_line
     done
-
-    print_line
     #todo close emulator
 else
     echo Emulator is running
