@@ -23,7 +23,7 @@ do
     # check if debug apk exists
     if ! [[ -z ${APK_NAME} ]]; then
         DEBUG_APK_NAME=${ANDROID_TEST_APK_FOLDER}/${APK_NAME}
-        echo debug ${DEBUG_APK_NAME}
+        echo ${DEBUG_APK_NAME}
         cd ..
 
         TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
