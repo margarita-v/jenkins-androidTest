@@ -6,7 +6,7 @@ cd ..
 
 #./gradlew clean assembleDebug assembleAndroidTest
 
-ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
+ANDROID_TEST_APK_LIST=`get_apk_list "androidTest" | grep -v sample-dagger | grep -v sample-common`
 
 for androidTestApk in ${ANDROID_TEST_APK_LIST}
 do

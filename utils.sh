@@ -7,7 +7,7 @@ get_apk_list() {
         Функция, возвращающая список имен APK-файлов с заданным суффиксом,
         который передается параметром.
     '
-    grep -r --include "*-$1.apk" . | cut -d ' ' -f3 | grep sample
+    grep -r --include "*-$1.apk" . | cut -d ' ' -f3 | grep -E 'sample|app-injector'
 }
 
 print_line() {

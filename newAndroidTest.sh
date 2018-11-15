@@ -7,6 +7,7 @@ set -e
 # BUILD APK FOR INSTRUMENTAL TESTS
 
 #todo uncoment
+#todo cd .. for ./gradlew
 #./gradlew clean assembleDebug assembleAndroidTest
 
 TMP_PACKAGE_NAME=/data/local/tmp/
@@ -33,7 +34,7 @@ if [[ -z "$EMULATOR_NAME" ]]; then
     PROJECT_LOCATION="`pwd`/"
     print "Project location ${PROJECT_LOCATION}"
 
-    ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
+    ANDROID_TEST_APK_LIST=`get_apk_list "androidTest" | grep -v sample-dagger | grep -v sample-common`
 
     for androidTestApk in ${ANDROID_TEST_APK_LIST}
     do
