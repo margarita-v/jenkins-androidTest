@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<hierarchy rotation="0">
+    <node bounds="[28,682][1052,1174]" checkable="false" checked="false" class="android.widget.FrameLayout"
+        clickable="false" content-desc="" enabled="true" focusable="false"
+        focused="false" index="0" long-clickable="false" package="com.google.android.gms" password="false"
+        resource-id="" scrollable="false" selected="false" text="">
+        <node bounds="[70,724][1010,1132]" checkable="false" checked="false" class="android.widget.FrameLayout"
+            clickable="false" content-desc="" enabled="true" focusable="false"
+            focused="false" index="0" long-clickable="false" package="com.google.android.gms" password="false"
+            resource-id="" scrollable="false" selected="false" text="">
+            <node bounds="[70,724][1010,1132]" checkable="false" checked="false"
+                class="android.widget.FrameLayout" clickable="false" content-desc=""
+                enabled="true" focusable="false" focused="false" index="0" long-clickable="false"
+                package="com.google.android.gms" password="false" resource-id="android:id/content" scrollable="false"
+                selected="false" text="">
+                <node bounds="[70,724][1010,1132]" checkable="false" checked="false"
+                    class="android.widget.LinearLayout" clickable="false"
+                    content-desc="" enabled="true" focusable="false" focused="false"
+                    index="0" long-clickable="false" package="com.google.android.gms" password="false"
+                    resource-id="android:id/parentPanel" scrollable="false" selected="false"
+                    text="">
+                    <node bounds="[70,724][1010,984]" checkable="false" checked="false"
+                        class="android.widget.FrameLayout" clickable="false"
+                        content-desc="" enabled="true" focusable="false" focused="false"
+                        index="0" long-clickable="false" package="com.google.android.gms" password="false"
+                        resource-id="android:id/customPanel" scrollable="false" selected="false"
+                        text="">
+                        <node bounds="[70,724][1010,984]" checkable="false" checked="false"
+                            class="android.widget.FrameLayout" clickable="false"
+                            content-desc="" enabled="true" focusable="false" focused="false"
+                            index="0" long-clickable="false" package="com.google.android.gms" password="false"
+                            resource-id="android:id/custom" scrollable="false" selected="false"
+                            text="">
+                            <node bounds="[70,724][1010,984]" checkable="false" checked="false" class="android.widget.ScrollView"
+                                clickable="false" content-desc="" enabled="true"
+                                focusable="true" focused="false" index="0" long-clickable="false"
+                                package="com.google.android.gms" password="false" resource-id=""
+                                scrollable="false" selected="false" text="">
+                                <node bounds="[70,724][1010,942]" checkable="false" checked="false"
+                                    class="android.widget.LinearLayout"
+                                    clickable="false" content-desc=""
+                                    enabled="true" focusable="false" focused="false"
+                                    index="0" long-clickable="false" package="com.google.android.gms"
+                                    password="false" resource-id="" scrollable="false"
+                                    selected="false" text="">
+                                    <node bounds="[70,766][1010,942]"
+                                        checkable="false"
+                                        checked="false"
+                                        class="android.widget.TextView"
+                                        clickable="true" content-desc=""
+                                        enabled="true" focusable="true" focused="false"
+                                        index="0" long-clickable="false" package="com.google.android.gms"
+                                        password="false" resource-id="com.google.android.gms:id/message" scrollable="false"
+                                        selected="false" text="For a better experience, turn on device location, which uses Google’s location service. " />
+                                </node>
+                            </node>
+                        </node>
+                    </node>
+                    <node bounds="[70,984][1010,1132]" checkable="false" checked="false"
+                        class="android.widget.ScrollView" clickable="false"
+                        content-desc="" enabled="true" focusable="true" focused="false"
+                        index="1" long-clickable="false" package="com.google.android.gms" password="false"
+                        resource-id="android:id/buttonPanel" scrollable="false" selected="false"
+                        text="">
+                        <node bounds="[70,984][1010,1132]" checkable="false" checked="false" class="android.widget.LinearLayout"
+                            clickable="false" content-desc="" enabled="true"
+                            focusable="false" focused="false" index="0" long-clickable="false"
+                            package="com.google.android.gms" password="false" resource-id=""
+                            scrollable="false" selected="false" text="">
+                            <node bounds="[543,995][810,1121]" checkable="false" checked="false"
+                                class="android.widget.Button" clickable="true"
+                                content-desc="" enabled="true" focusable="true" focused="false"
+                                index="0" long-clickable="false" package="com.google.android.gms" password="false"
+                                resource-id="android:id/button2" scrollable="false" selected="false"
+                                text="NO THANKS" />
+                            <node bounds="[810,995][978,1121]" checkable="false" checked="false"
+                                class="android.widget.Button" clickable="true"
+                                content-desc="" enabled="true" focusable="true" focused="false"
+                                index="1" long-clickable="false" package="com.google.android.gms" password="false"
+                                resource-id="android:id/button1" scrollable="false" selected="false"
+                                text="OK" />
+                        </node>
+                    </node>
+                </node>
+            </node>
+        </node>
+    </node>
+</hierarchy>
