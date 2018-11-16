@@ -32,9 +32,7 @@ if [[ -z "$EMULATOR_NAME" ]]; then
     cd ..
     PROJECT_LOCATION="`pwd`/"
 
-    ANDROID_TEST_APK_LIST=`get_apk_list "androidTest"`
-
-    for androidTestApk in ${ANDROID_TEST_APK_LIST}
+    for androidTestApk in `get_apk_list "androidTest"`
     do
         print ${androidTestApk}
 
