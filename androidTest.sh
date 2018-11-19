@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -e
+set -e
 #todo close emulator on error
 
 . ./utils.sh --source-only
@@ -29,6 +29,7 @@ if [[ -z "$EMULATOR_NAME" ]]; then
     gnome-terminal -e "emulator -avd ${avd_name} -skin ${scin_size} -no-snapshot-save"
 
     adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+    sleep 30s
 
     cd ..
     PROJECT_LOCATION="`pwd`/"
@@ -62,13 +63,13 @@ if [[ -z "$EMULATOR_NAME" ]]; then
             DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
             TEST_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
 
-            push "${PROJECT_LOCATION}${DEBUG_APK_NAME}" ${DEBUG_APK_PACKAGE_NAME}
+            push ${PROJECT_LOCATION}${DEBUG_APK_NAME} ${DEBUG_APK_PACKAGE_NAME}
             install_apk ${DEBUG_APK_PACKAGE_NAME}
 
-            push "${PROJECT_LOCATION}${androidTestApk}" ${TEST_APK_PACKAGE_NAME}
+            push ${PROJECT_LOCATION}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
             install_apk ${TEST_APK_PACKAGE_NAME}
 
-            adb shell am instrument -w -r -e debug false ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+            run_instrumental_test ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
         else
             cd ..
         fi

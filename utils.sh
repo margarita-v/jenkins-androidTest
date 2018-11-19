@@ -34,15 +34,19 @@ print() {
 }
 
 push() {
-    adb push $1 $2
+    adb -s `get_emulator_name` push $1 $2
 }
 
 install_apk() {
-    adb shell pm install -t -r $1
+    adb -s `get_emulator_name` shell pm install -t -r $1
+}
+
+run_instrumental_test() {
+    adb -s `get_emulator_name` shell am instrument -w -r -e debug false $1
 }
 
 get_emulator_name() {
-    return `adb devices | grep emulator | cut -f1`
+    adb devices | grep emulator | cut -f1
 }
 
 get_class_names() {
