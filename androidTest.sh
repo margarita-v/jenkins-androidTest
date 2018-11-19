@@ -4,13 +4,14 @@
 
 . ./utils.sh --source-only
 
+INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME="getTestInstrumentationRunnerName"
+
 # BUILD APK FOR INSTRUMENTAL TESTS
 
 #todo uncoment
 #./gradlew assembleAndroidTest
 
 TMP_PACKAGE_NAME=/data/local/tmp/
-ANDROID_JUNIT_RUNNER_NAME="androidx.test.runner.AndroidJUnitRunner"
 
 # check if the emulator is running
 EMULATOR_NAME=`get_emulator_name`
@@ -54,6 +55,10 @@ if [[ -z "$EMULATOR_NAME" ]]; then
             DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
             print ${DEBUG_PACKAGE_NAME}
 
+            CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=:${ANDROID_TEST_APK_FOLDER}:${INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME}
+            CURRENT_INSTRUMENTATION_RUNNER_NAME=`./gradlew ${CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME} | tail -4 | head -1`
+            print ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+
             DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
             TEST_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
 
@@ -63,7 +68,7 @@ if [[ -z "$EMULATOR_NAME" ]]; then
             push "${PROJECT_LOCATION}${androidTestApk}" ${TEST_APK_PACKAGE_NAME}
             install_apk ${TEST_APK_PACKAGE_NAME}
 
-            adb shell am instrument -w -r -e debug false ${TEST_PACKAGE_NAME}/"$ANDROID_JUNIT_RUNNER_NAME"
+            adb shell am instrument -w -r -e debug false ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
         else
             cd ..
         fi
