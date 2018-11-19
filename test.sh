@@ -1,69 +1,69 @@
 #!/bin/bash
+set -e
 
 . ./utils.sh --source-only
 
-INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME="getTestInstrumentationRunnerName"
+NULL_INSTRUMENTATION_RUNNER_NAME="null"
+
+OUTPUT_FILENAME="result"
+
+TEST_BUILD_TYPE_NAME="debug"
+ANDROID_TEST_APK_SUFFIX="androidTest"
+ANDROID_TEST_APK_FILENAME_SUFFIX=-${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}.apk
 
 cd ..
 
 #./gradlew clean assembleDebug assembleAndroidTest
 
-for androidTestApk in `get_apk_list "androidTest"`
+for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`
 do
     echo ${androidTestApk}
 
-    ANDROID_TEST_APK_FOLDER=`get_apk_folder_names ${androidTestApk}`
+    ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_names ${androidTestApk}`
     ANDROID_TEST_APK_FILE_NAME=`echo ${androidTestApk} | rev | cut -d '/' -f1 | rev`
 
-    # find debug apk and test package name
-    cd ${ANDROID_TEST_APK_FOLDER}
+    # check if project has submodules
+    ANDROID_TEST_APK_MODULE_FOLDER=`echo ${androidTestApk} | cut -d '/' -f2`
 
-    APK_NAME=`get_apk_list "debug"`
+    if [[ ${ANDROID_TEST_APK_MODULE_FOLDER} != build ]]; then
+        ANDROID_TEST_APK_PREFIX=${ANDROID_TEST_APK_MODULE_FOLDER}
+    else
+        ANDROID_TEST_APK_PREFIX=`echo ${ANDROID_TEST_APK_FILE_NAME} | awk -F ${ANDROID_TEST_APK_FILENAME_SUFFIX} '{ print $1 }'`
+    fi
+
+    if [[ ${ANDROID_TEST_APK_MAIN_FOLDER} != ${ANDROID_TEST_APK_PREFIX} ]]; then
+        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}:${ANDROID_TEST_APK_PREFIX}`
+    else
+        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}`
+    fi
+
+    # find debug apk and test package name
+    cd ${ANDROID_TEST_APK_MAIN_FOLDER}
+
+    APK_NAME=`get_apk_list ${TEST_BUILD_TYPE_NAME}`
 
     # check if debug apk exists
     if ! [[ -z ${APK_NAME} ]]; then
-        DEBUG_APK_NAME=${ANDROID_TEST_APK_FOLDER}/${APK_NAME}
+        DEBUG_APK_NAME=${ANDROID_TEST_APK_MAIN_FOLDER}/${APK_NAME}
         cd ..
 
-        TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
-        echo ${TEST_PACKAGE_NAME}
+        ./gradlew ${CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME} > ${OUTPUT_FILENAME}
+        CURRENT_INSTRUMENTATION_RUNNER_NAME=`cat ${OUTPUT_FILENAME} | tail -4 | head -1`
 
-        DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
-        echo ${DEBUG_PACKAGE_NAME}
+        # check if testInstrumentationRunnerName is not null for the current module
+        if [[ ${CURRENT_INSTRUMENTATION_RUNNER_NAME} != ${NULL_INSTRUMENTATION_RUNNER_NAME} ]]; then
+            TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
+            echo ${TEST_PACKAGE_NAME}
 
-        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=:${ANDROID_TEST_APK_FOLDER}:${INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME}
-        CURRENT_INSTRUMENTATION_RUNNER_NAME=`./gradlew ${CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME} | tail -4 | head -1`
-        echo ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+            DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
+            echo ${DEBUG_PACKAGE_NAME}
+
+            echo ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+        fi
     else
         cd ..
     fi
     print_line
 done
 
-#print ANDROID_TEST_PACKAGES
-#ANDROID_TEST_PACKAGES=`get_test_packages_for_apks ${ANDROID_TEST_APK_FOLDER_NAMES}`
-#print_elements ${ANDROID_TEST_PACKAGES}
-
-#print DEBUG_APK_LIST
-#DEBUG_APK_LIST=`get_debug_apks ${ANDROID_TEST_APK_FOLDER_NAMES}`
-#print_elements ${DEBUG_APK_LIST}
-
-
-
-#print DEBUG_APK_LIST
-#DEBUG_APK_LIST=`get_apk_list "debug" | grep -v sample-common | grep -v sample-dagger`
-#print_elements ${DEBUG_APK_LIST}
-
-#print_elements `get_apk_folder_names ${DEBUG_APK_LIST}`
-
-
-#print ANDROID_MANIFEST_FOLDER_NAMES
-#ANDROID_MANIFEST_FOLDER_NAMES=`get_manifests_folders_names`
-#print_elements ${ANDROID_MANIFEST_FOLDER_NAMES}
-
-#adb -s PRO75SSOCQQ8SCAE shell am instrument -w -r -e debug false \
-#\ "ru.surfstudio.android.custom_scope_sample.test/androidx.test.runner.AndroidJUnitRunner"
-
-#adb -s emulator-5554 shell am instrument -w -r -e debug false \
-#\ -e class 'ru.surfstudio.android.custom_scope_sample.AnotherScopeSampleAndroidTest' \
-#\ ru.surfstudio.android.custom_scope_sample.test/androidx.test.runner.AndroidJUnitRunner
+rm ${OUTPUT_FILENAME}

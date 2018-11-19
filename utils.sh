@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ANDROID_MANIFEST_FILE_NAME="AndroidManifest.xml"
+INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME="getTestInstrumentationRunnerName"
 
 get_apk_list() {
     : '
@@ -8,6 +9,10 @@ get_apk_list() {
         который передается параметром.
     '
     grep -r --include "*-$1.apk" . | cut -d ' ' -f3
+}
+
+get_instrumentation_runner_name() {
+    echo :$1:${INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME}
 }
 
 print_line() {
