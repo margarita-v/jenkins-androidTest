@@ -33,16 +33,20 @@ print() {
     echo
 }
 
+wait_for_device() {
+    adb -s $1 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+}
+
 push() {
-    adb -s `get_emulator_name` push $1 $2
+    adb -s $1 push $2 $3
 }
 
 install_apk() {
-    adb -s `get_emulator_name` shell pm install -t -r $1
+    adb -s $1 shell pm install -t -r $2
 }
 
 run_instrumental_test() {
-    adb -s `get_emulator_name` shell am instrument -w -r -e debug false $1
+    adb -s $1 shell am instrument -w -r -e debug false $2
 }
 
 get_emulator_name() {

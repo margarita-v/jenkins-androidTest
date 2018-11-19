@@ -28,8 +28,8 @@ if [[ -z "$EMULATOR_NAME" ]]; then
     #todo add `adb -s $name shell ...`
     gnome-terminal -e "emulator -avd ${avd_name} -skin ${scin_size} -no-snapshot-save"
 
-    adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-    sleep 30s
+    sleep 20s
+    EMULATOR_NAME=`get_emulator_name`
 
     cd ..
     PROJECT_LOCATION="`pwd`/"
@@ -63,13 +63,13 @@ if [[ -z "$EMULATOR_NAME" ]]; then
             DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
             TEST_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
 
-            push ${PROJECT_LOCATION}${DEBUG_APK_NAME} ${DEBUG_APK_PACKAGE_NAME}
-            install_apk ${DEBUG_APK_PACKAGE_NAME}
+            push ${EMULATOR_NAME} ${PROJECT_LOCATION}${DEBUG_APK_NAME} ${DEBUG_APK_PACKAGE_NAME}
+            install_apk ${EMULATOR_NAME} ${DEBUG_APK_PACKAGE_NAME}
 
-            push ${PROJECT_LOCATION}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
-            install_apk ${TEST_APK_PACKAGE_NAME}
+            push ${EMULATOR_NAME} ${PROJECT_LOCATION}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
+            install_apk ${EMULATOR_NAME} ${TEST_APK_PACKAGE_NAME}
 
-            run_instrumental_test ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+            run_instrumental_test ${EMULATOR_NAME} ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
         else
             cd ..
         fi
