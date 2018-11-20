@@ -42,6 +42,10 @@ wait_for_device() {
     adb -s $1 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 }
 
+clean_app_data() {
+    adb -s $1 shell pm clear $2
+}
+
 push() {
     adb -s $1 push $2 $3
 }

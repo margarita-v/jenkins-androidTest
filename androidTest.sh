@@ -19,6 +19,7 @@ TMP_PACKAGE_NAME=/data/local/tmp/
 
 # check if the emulator is running
 EMULATOR_NAME=`get_emulator_name`
+HAS_RUNNING_EMULATOR=true
 
 if [[ -z "$EMULATOR_NAME" ]]; then
     # read params from config file
@@ -32,6 +33,7 @@ if [[ -z "$EMULATOR_NAME" ]]; then
     gnome-terminal -e "emulator -avd ${avd_name} -skin ${scin_size} -no-snapshot-save"
 
     sleep 20s
+    HAS_RUNNING_EMULATOR=false
     EMULATOR_NAME=`get_emulator_name`
 fi
 
@@ -74,13 +76,18 @@ do
 
         # check if testInstrumentationRunnerName is not null for the current module
         if [[ ${CURRENT_INSTRUMENTATION_RUNNER_NAME} != ${NULL_INSTRUMENTATION_RUNNER_NAME} ]]; then
+            print ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+
             TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
             print ${TEST_PACKAGE_NAME}
 
             DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
             print ${DEBUG_PACKAGE_NAME}
 
-            print ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+            # clear all app data for previous tests
+            if [[ ${HAS_RUNNING_EMULATOR} == true ]]; then
+                clean_app_data ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME}
+            fi
 
             DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
             TEST_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
