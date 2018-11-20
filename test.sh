@@ -19,7 +19,7 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`
 do
     echo ${androidTestApk}
 
-    ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_names ${androidTestApk}`
+    ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
     ANDROID_TEST_APK_FILE_NAME=`echo ${androidTestApk} | rev | cut -d '/' -f1 | rev`
 
     # check if project has submodules
