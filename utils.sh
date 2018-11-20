@@ -3,16 +3,21 @@
 ANDROID_MANIFEST_FILE_NAME="AndroidManifest.xml"
 INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME="getTestInstrumentationRunnerName"
 INSTRUMENTATION_RUNNER_LISTENER_NAME="de.schroepf.androidxmlrunlistener.XmlRunListener"
+DEFAULT_TEST_REPORT_FILENAME="report-0.xml"
 
 get_apk_list() {
     : '
-        Функция, возвращающая список имен APK-файлов с заданным суффиксом,
-        который передается параметром.
+        Function which returns a list of APK files with a concrete suffix,
+        which is passed as parameter
     '
     grep -r --include "*-$1.apk" . | cut -d ' ' -f3
 }
 
 get_instrumentation_runner_name() {
+    : '
+        Function which returns a name of gradle task for getting of instrumentation runner name
+        for a concrete module which name is passed as parameter
+    '
     echo :$1:${INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME}
 }
 
@@ -22,6 +27,9 @@ print_line() {
 }
 
 print_elements() {
+    : '
+        Function which prints all elements of list and its size
+    '
     print_line
     for word in $@
     do
@@ -44,15 +52,37 @@ wait_for_device() {
 }
 
 clean_app_data() {
+    : '
+        Function which removes all package data for a concrete emulator
+        $1 - emulator name
+        $2 - package name
+    '
     adb -s $1 shell pm clear $2
 }
 
 push() {
+    : '
+        Function for pushing APK to the concrete apk package
+        $1 - emulator name
+        $2 - APK name
+        $3 - APK dest package
+    '
     adb -s $1 push $2 $3
 }
 
+get_test_report_filename() {
+    : '
+        Function which returns a test report filename
+        for a concrete module which name is passed as parameter
+    '
+    echo "/sdcard/Android/data/$1/files/$DEFAULT_TEST_REPORT_FILENAME"
+}
+
 pull_test_report() {
-    adb -s $1 shell cat "/sdcard/Android/data/$2/files/report-0.xml" > $3
+    TEST_REPORT_FILENAME=`get_test_report_filename $2`
+    if [[ `adb -s $1 shell ls ${TEST_REPORT_FILENAME} 2> /dev/null` ]]; then
+        adb -s $1 shell cat ${TEST_REPORT_FILENAME}  > $3
+    fi
 }
 
 install_apk() {
