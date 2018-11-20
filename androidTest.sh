@@ -116,3 +116,14 @@ done
 #todo close emulator
 
 rm ${OUTPUT_FILENAME}
+
+#todo temporary using
+print_results() {
+    cat */report* | grep "$1"
+    print_line
+}
+
+print_results "<testcase name="
+print_results "failures="
+
+rm -r */report*; #rm -r template/*/report*
