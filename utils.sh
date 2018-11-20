@@ -2,6 +2,7 @@
 
 ANDROID_MANIFEST_FILE_NAME="AndroidManifest.xml"
 INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME="getTestInstrumentationRunnerName"
+INSTRUMENTATION_RUNNER_LISTENER_NAME="de.schroepf.androidxmlrunlistener.XmlRunListener"
 
 get_apk_list() {
     : '
@@ -50,12 +51,16 @@ push() {
     adb -s $1 push $2 $3
 }
 
+pull_test_report() {
+    adb -s $1 shell cat "/sdcard/Android/data/$2/files/report-0.xml" > $3
+}
+
 install_apk() {
     adb -s $1 shell pm install -t -r $2
 }
 
 run_instrumental_test() {
-    adb -s $1 shell am instrument -w -r -e debug false $2
+    adb -s $1 shell am instrument -w -r -e debug false -e listener ${INSTRUMENTATION_RUNNER_LISTENER_NAME} $2
 }
 
 get_emulator_name() {

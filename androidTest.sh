@@ -13,7 +13,7 @@ ANDROID_TEST_APK_SUFFIX="androidTest"
 ANDROID_TEST_APK_FILENAME_SUFFIX=-${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}.apk
 
 #todo uncoment
-#./gradlew assembleAndroidTest
+#./gradlew assembleAndroidTest todo check assemble result code
 
 TMP_PACKAGE_NAME=/data/local/tmp/
 
@@ -42,6 +42,7 @@ PROJECT_LOCATION="`pwd`/"
 
 for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`
 do
+    #todo check emulator pid
     print ${androidTestApk}
 
     ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_names ${androidTestApk}`
@@ -58,8 +59,10 @@ do
 
     if [[ ${ANDROID_TEST_APK_MAIN_FOLDER} != ${ANDROID_TEST_APK_PREFIX} ]]; then
         CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}:${ANDROID_TEST_APK_PREFIX}`
+        TEST_REPORT_FILENAME_SUFFIX=${ANDROID_TEST_APK_MAIN_FOLDER}-${ANDROID_TEST_APK_PREFIX}
     else
         CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}`
+        TEST_REPORT_FILENAME_SUFFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
     fi
 
     # find debug apk and test package name
@@ -98,7 +101,9 @@ do
             push ${EMULATOR_NAME} ${PROJECT_LOCATION}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
             install_apk ${EMULATOR_NAME} ${TEST_APK_PACKAGE_NAME}
 
+            echo run_instrumental_test
             run_instrumental_test ${EMULATOR_NAME} ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
+            pull_test_report ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} "$ANDROID_TEST_APK_MAIN_FOLDER/report-$TEST_REPORT_FILENAME_SUFFIX.xml"
         fi
     else
         cd ..
