@@ -36,16 +36,6 @@ PROJECT_ROOT_DIR=`pwd`/
  # read params from config file
 . ${SHELL_SCRIPTS_DIR}/avd-config
 
-create_and_launch_new_emulator() {
-    echo "create new emulator"
-    create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
-    launch_concrete_emulator
-}
-
-launch_concrete_emulator() {
-    launch_emulator "$avd_name" "$skin_size"
-}
-
 CURRENT_TIMEOUT_SEC=${LONG_TIMEOUT_SEC}
 EMULATOR_NAME=`get_emulator_name`
 
@@ -56,14 +46,16 @@ if [[ ${reuse} == true ]]; then
         echo "launch reused emulator"
         # check if emulator is running
         if [[ -z ${EMULATOR_NAME} ]]; then
-            launch_concrete_emulator
+            launch_emulator "$avd_name" "$skin_size"
         else
             CURRENT_TIMEOUT_SEC=0
             echo "emulator have been launched already"
         fi
         #CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
     else
-        create_and_launch_new_emulator
+        echo "create new emulator"
+        create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
+        launch_emulator "$avd_name" "$skin_size"
     fi
 else
     # close running emulator
@@ -71,7 +63,9 @@ else
         echo "close running emulator"
         close_emulator ${EMULATOR_NAME}
     fi
-    create_and_launch_new_emulator
+    echo "create new emulator"
+    create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
+    launch_emulator "$avd_name" "$skin_size"
 fi
 
 sleep ${CURRENT_TIMEOUT_SEC}
