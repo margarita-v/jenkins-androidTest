@@ -5,3 +5,4 @@ sdcard_size="3072M"
 skin_size="1440x2560"
 skin_name="nexus_5x"
 reuse=true
+stay=true
