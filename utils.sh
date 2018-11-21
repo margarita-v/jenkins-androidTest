@@ -101,6 +101,16 @@ install_apk() {
     adb -s $1 shell pm install -t -r $2
 }
 
+uninstall_apk() {
+    : '
+        Function for uninstalling the APK from emulator
+        $1 - emulator name
+        $2 - APK package name
+    '
+    echo uninstall previous app
+    adb -s $1 uninstall $2
+}
+
 run_instrumental_test() {
     : '
         Function for launching an instrumental tests on the emulator

@@ -87,7 +87,7 @@ do
 
             # clear all app data for previous tests
             if [[ ${HAS_RUNNING_EMULATOR} == true ]]; then
-                clean_app_data ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME}
+                uninstall_apk ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME}
             fi
 
             DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
@@ -99,7 +99,6 @@ do
             push ${EMULATOR_NAME} ${PROJECT_LOCATION}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
             install_apk ${EMULATOR_NAME} ${TEST_APK_PACKAGE_NAME}
 
-            echo run_instrumental_test
             run_instrumental_test ${EMULATOR_NAME} ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
             pull_test_report ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} "$TEST_REPORT_FOLDER/report-$TEST_REPORT_FILENAME_SUFFIX.xml"
         fi
@@ -114,11 +113,11 @@ rm ${OUTPUT_FILENAME}
 
 #todo temporary using
 print_results() {
-    cat */report* | grep "$1"
+    cat */report* | grep "$1" && cat template/*/report* | grep "$1"
     print_line
 }
 
 print_results "<testcase name="
 print_results "failures="
 
-rm -r */report*; #rm -r template/*/report*
+rm -r */report*; rm -r template/*/report*
