@@ -21,6 +21,33 @@ get_instrumentation_runner_name() {
     echo :$1:${INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME}
 }
 
+create_avd() {
+    : '
+        Function for creation the AVD with given params
+        $1 - name of the new AVD
+        $2 - device name for AVD
+        $3 - SDK ID
+        $4 - sdcard size
+    '
+    avdmanager create avd -f -n "$1" -d "$2" -k "$3" -c "$4"
+}
+
+launch_emulator() {
+    : '
+        Function for launching emulator
+        $1 - name of AVD which will be launched
+        $2 - skin size of AVD
+    '
+    # launch emulator in background process
+    # emulator -avd "$1" -skin "$2" -no-snapshot-save &
+
+    # launch emulator in another terminal tab
+    # gnome-terminal -x sh -c "emulator -avd '$1' -skin '$2' -no-snapshot-save"
+
+    # launch emulator in another terminal window
+    gnome-terminal -e "emulator -avd '$1' -skin '$2' -no-snapshot-save"
+}
+
 wait_for_device() {
     adb -s $1 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 }

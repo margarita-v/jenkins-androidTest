@@ -24,13 +24,8 @@ HAS_RUNNING_EMULATOR=true
 if [[ -z "$EMULATOR_NAME" ]]; then
     # read params from config file
     . avd-config
-    avdmanager create avd -f -n "$avd_name" -d "$device_name" -k "$sdk_id" -c "$sdcard_size"
-    # launch emulator in background process
-    # emulator -avd "$avd_name" -skin "$scin_size" -no-snapshot-save &
-    # launch emulator in another terminal tab
-    # gnome-terminal -x sh -c "emulator -avd "$avd_name" -skin "$scin_size" -no-snapshot-save"
-    # launch emulator in another terminal window
-    gnome-terminal -e "emulator -avd ${avd_name} -skin ${scin_size} -no-snapshot-save"
+    create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
+    launch_emulator "$avd_name" "$skin_size"
 
     sleep 20s
     HAS_RUNNING_EMULATOR=false
