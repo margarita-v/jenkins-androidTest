@@ -35,24 +35,43 @@ PROJECT_ROOT_DIR=`pwd`/
 
  # read params from config file
 . ${SHELL_SCRIPTS_DIR}/avd-config
-CURRENT_TIMEOUT_SEC=${LONG_TIMEOUT_SEC}
 
-if [[ ${reuse} == true ]] && is_avd_exists "$avd_name"; then
-    echo "launch reused emulator"
-    # check if emulator is running
-    if [[ -z `get_emulator_name` ]]; then
-        launch_emulator "$avd_name" "$skin_size"
-    else
-        CURRENT_TIMEOUT_SEC=0
-        echo "emulator have been launched already"
-    fi
-    #CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
-else
-    # create new emulator
-    #todo close running emulator
+create_and_launch_new_emulator() {
     echo "create new emulator"
     create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
+    launch_concrete_emulator
+}
+
+launch_concrete_emulator() {
     launch_emulator "$avd_name" "$skin_size"
+}
+
+CURRENT_TIMEOUT_SEC=${LONG_TIMEOUT_SEC}
+EMULATOR_NAME=`get_emulator_name`
+
+if [[ ${reuse} == true ]]; then
+    # check if emulator exists
+    is_avd_exists "$avd_name" && EXIT_CODE=$? || true 2> /dev/null
+    if [[ ${EXIT_CODE} == 0 ]]; then
+        echo "launch reused emulator"
+        # check if emulator is running
+        if [[ -z ${EMULATOR_NAME} ]]; then
+            launch_concrete_emulator
+        else
+            CURRENT_TIMEOUT_SEC=0
+            echo "emulator have been launched already"
+        fi
+        #CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
+    else
+        create_and_launch_new_emulator
+    fi
+else
+    # close running emulator
+    if ! [[ -z ${EMULATOR_NAME} ]]; then
+        echo "close running emulator"
+        close_emulator ${EMULATOR_NAME}
+    fi
+    create_and_launch_new_emulator
 fi
 
 sleep ${CURRENT_TIMEOUT_SEC}
@@ -130,7 +149,8 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
     fi
     print_line
 done
-#todo close emulator
+
+close_emulator ${EMULATOR_NAME}
 
 rm ${GRADLE_OUTPUT_FILENAME}
 

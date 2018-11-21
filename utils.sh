@@ -60,6 +60,16 @@ launch_emulator() {
     gnome-terminal -e "emulator -avd '$1' -skin '$2' -no-snapshot-save" # todo snapshot is optional
 }
 
+close_emulator() {
+    : '
+        Function which closes an emulator with given name
+        $1 - emulator name
+    '
+    adb -s $1 emu kill
+    # close all emulators
+    # adb devices | grep emulator | cut -f1 | while read line; do adb -s $line emu kill; done
+}
+
 wait_for_device() {
     adb -s $1 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 }
