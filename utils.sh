@@ -5,6 +5,18 @@ INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME="getTestInstrumentationRunnerName"
 INSTRUMENTATION_RUNNER_LISTENER_NAME="de.schroepf.androidxmlrunlistener.XmlRunListener"
 DEFAULT_TEST_REPORT_FILENAME="report-0.xml"
 
+is_avd_exists() {
+    : '
+        Function which checks if emulator with the given name exists
+    '
+    for avdName in `avdmanager list avd | grep Name | awk '{ print $2 }'`; do
+        if [[ ${avdName} == $1 ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 get_apk_list() {
     : '
         Function which returns a list of APK files with a concrete suffix,
@@ -45,7 +57,7 @@ launch_emulator() {
     # gnome-terminal -x sh -c "emulator -avd '$1' -skin '$2' -no-snapshot-save"
 
     # launch emulator in another terminal window
-    gnome-terminal -e "emulator -avd '$1' -skin '$2' -no-snapshot-save"
+    gnome-terminal -e "emulator -avd '$1' -skin '$2' -no-snapshot-save" # todo snapshot is optional
 }
 
 wait_for_device() {
@@ -107,8 +119,12 @@ uninstall_apk() {
         $1 - emulator name
         $2 - APK package name
     '
-    echo uninstall previous app
-    adb -s $1 uninstall $2
+    # check if APK exists
+    TEMP=`adb -s $1 shell pm list packages | grep $2`
+    if [[ $? == 0 ]]; then
+        echo "uninstall previous app"
+        adb -s $1 uninstall $2
+    fi
 }
 
 run_instrumental_test() {

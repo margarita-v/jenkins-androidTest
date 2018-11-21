@@ -4,40 +4,62 @@ set -e
 
 . ./utils.sh --source-only
 
+# name of undefined instrumentation runner for module
 NULL_INSTRUMENTATION_RUNNER_NAME="null"
 
-OUTPUT_FILENAME="result"
+# name of temporary file for output of gradle task
+GRADLE_OUTPUT_FILENAME="result"
 
+# name of build type which is used for running tests
 TEST_BUILD_TYPE_NAME="debug"
+
+# suffixes of APK files
 ANDROID_TEST_APK_SUFFIX="androidTest"
 ANDROID_TEST_APK_FILENAME_SUFFIX=-${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}.apk
+
+# package name of temporary dir of emulator
+TMP_PACKAGE_NAME="/data/local/tmp/"
+
+# timeout which is used for creation of emulator
+LONG_TIMEOUT_SEC=20
+# timeout which is used for launching of reused emulator
+SMALL_TIMEOUT_SEC=5
+
+SHELL_SCRIPTS_DIR=`pwd`
+# move to project root dir for building
+cd ..
+PROJECT_ROOT_DIR=`pwd`/
 
 #todo uncoment
 #./gradlew assembleAndroidTest todo check assemble result code
 
-TMP_PACKAGE_NAME=/data/local/tmp/
+ # read params from config file
+. ${SHELL_SCRIPTS_DIR}/avd-config
+CURRENT_TIMEOUT_SEC=${LONG_TIMEOUT_SEC}
 
-# check if the emulator is running
-EMULATOR_NAME=`get_emulator_name`
-HAS_RUNNING_EMULATOR=true
-
-if [[ -z "$EMULATOR_NAME" ]]; then
-    # read params from config file
-    . avd-config
+if [[ ${reuse} == true ]] && is_avd_exists "$avd_name"; then
+    echo "launch reused emulator"
+    # check if emulator is running
+    if [[ -z `get_emulator_name` ]]; then
+        launch_emulator "$avd_name" "$skin_size"
+    else
+        CURRENT_TIMEOUT_SEC=0
+        echo "emulator have been launched already"
+    fi
+    #CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
+else
+    # create new emulator
+    #todo close running emulator
+    echo "create new emulator"
     create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
     launch_emulator "$avd_name" "$skin_size"
-
-    sleep 20s
-    HAS_RUNNING_EMULATOR=false
-    EMULATOR_NAME=`get_emulator_name`
 fi
 
-cd ..
-PROJECT_LOCATION="`pwd`/"
+sleep ${CURRENT_TIMEOUT_SEC}
 
-for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`
-do
-    #todo check emulator pid
+EMULATOR_NAME=`get_emulator_name`
+
+for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
 
     ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
@@ -72,8 +94,8 @@ do
         DEBUG_APK_NAME=${ANDROID_TEST_APK_MAIN_FOLDER}/${APK_NAME}
         cd ..
 
-        ./gradlew ${CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME} > ${OUTPUT_FILENAME}
-        CURRENT_INSTRUMENTATION_RUNNER_NAME=`cat ${OUTPUT_FILENAME} | tail -4 | head -1`
+        ./gradlew ${CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME} > ${GRADLE_OUTPUT_FILENAME}
+        CURRENT_INSTRUMENTATION_RUNNER_NAME=`cat ${GRADLE_OUTPUT_FILENAME} | tail -4 | head -1`
 
         # check if testInstrumentationRunnerName is not null for the current module
         if [[ ${CURRENT_INSTRUMENTATION_RUNNER_NAME} != ${NULL_INSTRUMENTATION_RUNNER_NAME} ]]; then
@@ -86,17 +108,18 @@ do
             print ${DEBUG_PACKAGE_NAME}
 
             # clear all app data for previous tests
-            if [[ ${HAS_RUNNING_EMULATOR} == true ]]; then
-                uninstall_apk ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME}
+            if [[ ${reuse} == true ]]; then
+                # ignore error result code for grep
+                uninstall_apk ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} || true
             fi
 
             DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
             TEST_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
 
-            push ${EMULATOR_NAME} ${PROJECT_LOCATION}${DEBUG_APK_NAME} ${DEBUG_APK_PACKAGE_NAME}
+            push ${EMULATOR_NAME} ${PROJECT_ROOT_DIR}${DEBUG_APK_NAME} ${DEBUG_APK_PACKAGE_NAME}
             install_apk ${EMULATOR_NAME} ${DEBUG_APK_PACKAGE_NAME}
 
-            push ${EMULATOR_NAME} ${PROJECT_LOCATION}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
+            push ${EMULATOR_NAME} ${PROJECT_ROOT_DIR}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
             install_apk ${EMULATOR_NAME} ${TEST_APK_PACKAGE_NAME}
 
             run_instrumental_test ${EMULATOR_NAME} ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
@@ -109,7 +132,7 @@ do
 done
 #todo close emulator
 
-rm ${OUTPUT_FILENAME}
+rm ${GRADLE_OUTPUT_FILENAME}
 
 #todo temporary using
 print_results() {
