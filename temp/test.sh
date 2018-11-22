@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-. ./utils.sh --source-only
+. ../utils.sh --source-only
 
 NULL_INSTRUMENTATION_RUNNER_NAME="null"
 
