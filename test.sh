@@ -13,7 +13,7 @@ ANDROID_TEST_APK_FILENAME_SUFFIX=-${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUF
 
 cd ..
 
-#./gradlew clean assembleDebug assembleAndroidTest
+#./gradlew clean assembleDebug
 
 for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`
 do

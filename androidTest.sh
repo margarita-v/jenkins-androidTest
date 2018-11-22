@@ -1,7 +1,43 @@
 #!/bin/bash
 set -e
 
+# register actions which must be performed on any errors
 trap cleanup_on_exit 1 2 3 6
+
+cleanup_on_exit() {
+    close_running_emulator
+    remove_report_files
+}
+
+create_and_launch_new_emulator() {
+    echo "create new emulator"
+    create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
+    launch_concrete_emulator
+}
+
+launch_concrete_emulator() {
+    launch_emulator "$avd_name" "$skin_size" "$stay"
+}
+
+remove_report_files() {
+    rm -rf */report*
+    rm -rf template/*/report*
+    rm ${GRADLE_OUTPUT_FILENAME} 2> /dev/null || true
+}
+
+close_running_emulator() {
+    # close running emulator if it exists
+    CURRENT_EMULATOR_NAME=`get_emulator_name`
+    if ! [[ -z ${CURRENT_EMULATOR_NAME} ]]; then
+        echo "close running emulator"
+        close_emulator ${CURRENT_EMULATOR_NAME}
+    fi
+    # delete AVD if needed
+    if [[ ${stay} == false ]]; then
+        echo "delete avd"
+        delete_avd ${avd_name}
+    fi
+}
 
 . ./utils.sh --source-only
 
@@ -36,40 +72,6 @@ echo "assemble APK files for instrumental tests"
 
  # read params from config file
 . ${SHELL_SCRIPTS_DIR}/avd-config
-
-create_and_launch_new_emulator() {
-    echo "create new emulator"
-    create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
-    launch_concrete_emulator
-}
-
-launch_concrete_emulator() {
-    launch_emulator "$avd_name" "$skin_size" "$stay"
-}
-
-cleanup_on_exit() {
-    close_running_emulator
-    remove_report_files
-}
-
-remove_report_files() {
-    rm -rf */report*
-    rm -rf template/*/report*
-    rm ${GRADLE_OUTPUT_FILENAME} 2> /dev/null || true
-}
-
-close_running_emulator() {
-    CURRENT_EMULATOR_NAME=`get_emulator_name`
-    if ! [[ -z ${CURRENT_EMULATOR_NAME} ]]; then
-        echo "close running emulator"
-        close_emulator ${CURRENT_EMULATOR_NAME}
-    fi
-
-    if [[ ${stay} == false ]]; then
-        echo "delete avd"
-        delete_avd ${avd_name}
-    fi
-}
 
 CURRENT_TIMEOUT_SEC=${LONG_TIMEOUT_SEC}
 EMULATOR_NAME=`get_emulator_name`
