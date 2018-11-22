@@ -2,6 +2,8 @@
 set -e
 #todo close emulator on error
 
+trap cleanup_on_exit 1 2 3 6
+
 . ./utils.sh --source-only
 
 # name of undefined instrumentation runner for module
@@ -46,6 +48,24 @@ launch_concrete_emulator() {
     launch_emulator "$avd_name" "$skin_size" "$stay"
 }
 
+cleanup_on_exit() {
+    close_running_emulator
+    remove_report_files
+}
+
+remove_report_files() {
+    rm -r */report* 2> /dev/null || true; rm -r template/*/report* 2> /dev/null || true
+}
+
+close_running_emulator() {
+    CURRENT_EMULATOR_NAME=`get_emulator_name`
+    if ! [[ -z ${CURRENT_EMULATOR_NAME} ]]; then
+        echo "close running emulator"
+        close_emulator ${CURRENT_EMULATOR_NAME}
+        #todo remove emulator if state=false
+    fi
+}
+
 CURRENT_TIMEOUT_SEC=${LONG_TIMEOUT_SEC}
 EMULATOR_NAME=`get_emulator_name`
 
@@ -66,11 +86,7 @@ if [[ ${reuse} == true ]]; then
         create_and_launch_new_emulator
     fi
 else
-    # close running emulator
-    if ! [[ -z ${EMULATOR_NAME} ]]; then
-        echo "close running emulator"
-        close_emulator ${EMULATOR_NAME}
-    fi
+    close_running_emulator
     create_and_launch_new_emulator
 fi
 
@@ -154,8 +170,7 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
     print_line
 done
 
-close_emulator ${EMULATOR_NAME}
-#todo remove emulator if state=false
+close_running_emulator
 
 rm ${GRADLE_OUTPUT_FILENAME}
 
@@ -168,4 +183,4 @@ print_results() {
 print_results "<testcase name="
 print_results "failures="
 
-rm -r */report*; rm -r template/*/report*
+remove_report_files
