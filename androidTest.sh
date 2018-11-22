@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-#todo close emulator on error
 
 trap cleanup_on_exit 1 2 3 6
 
@@ -32,8 +31,8 @@ SHELL_SCRIPTS_DIR=`pwd`
 cd ..
 PROJECT_ROOT_DIR=`pwd`/
 
-#todo uncoment
-#./gradlew assembleAndroidTest todo check assemble result code
+echo "assemble APK files for instrumental tests"
+./gradlew assembleAndroidTest
 
  # read params from config file
 . ${SHELL_SCRIPTS_DIR}/avd-config
@@ -54,7 +53,9 @@ cleanup_on_exit() {
 }
 
 remove_report_files() {
-    rm -r */report* 2> /dev/null || true; rm -r template/*/report* 2> /dev/null || true
+    rm -rf */report*
+    rm -rf template/*/report*
+    rm ${GRADLE_OUTPUT_FILENAME} 2> /dev/null || true
 }
 
 close_running_emulator() {
@@ -85,7 +86,7 @@ if [[ ${reuse} == true ]]; then
             CURRENT_TIMEOUT_SEC=0
             echo "emulator have been launched already"
         fi
-        #CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
+        CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
     else
         create_and_launch_new_emulator
     fi
@@ -94,9 +95,11 @@ else
     create_and_launch_new_emulator
 fi
 
+echo "waiting ${CURRENT_TIMEOUT_SEC} seconds..."
 sleep ${CURRENT_TIMEOUT_SEC}
 
 EMULATOR_NAME=`get_emulator_name`
+echo "start running tests"
 
 for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
@@ -118,13 +121,13 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
     TEST_REPORT_FILENAME_SUFFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
 
     if [[ ${ANDROID_TEST_APK_MAIN_FOLDER} != ${ANDROID_TEST_APK_PREFIX} ]]; then
-        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=\
-            `get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}:${ANDROID_TEST_APK_PREFIX}`
+        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name \
+            ${ANDROID_TEST_APK_MAIN_FOLDER}:${ANDROID_TEST_APK_PREFIX}`
         TEST_REPORT_FILENAME_SUFFIX+="-$ANDROID_TEST_APK_PREFIX"
         TEST_REPORT_FOLDER+="/$ANDROID_TEST_APK_PREFIX"
     else
-        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=\
-            `get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}`
+        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name \
+            ${ANDROID_TEST_APK_MAIN_FOLDER}`
     fi
 
     # find debug apk and test package name
