@@ -44,6 +44,13 @@ create_avd() {
     avdmanager create avd -f -n "$1" -d "$2" -k "$3" -c "$4"
 }
 
+delete_avd() {
+    : '
+        Function for removing the AVD with given params
+    '
+    avdmanager delete avd -n "$1"
+}
+
 launch_emulator() {
     : '
         Function for launching emulator
@@ -60,10 +67,10 @@ launch_emulator() {
     # launch emulator in another terminal window
     if [[ $3 == true ]]; then
         echo "stay"
-        gnome-terminal -e "emulator -avd '$1' -skin '$2'"
+        xterm -e emulator -avd "$1" -skin "$2"
     else
         echo "not stay"
-        gnome-terminal -e "emulator -avd '$1' -skin '$2' -no-snapshot-save"
+        xterm -e emulator -avd "$1" -skin "$2" -no-snapshot-save
     fi
 }
 
