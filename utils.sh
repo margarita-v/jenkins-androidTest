@@ -4,6 +4,7 @@ ANDROID_MANIFEST_FILE_NAME="AndroidManifest.xml"
 INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME="getTestInstrumentationRunnerName"
 INSTRUMENTATION_RUNNER_LISTENER_NAME="de.schroepf.androidxmlrunlistener.XmlRunListener"
 DEFAULT_TEST_REPORT_FILENAME="report-0.xml"
+WAIT_FOR_DEVICE_TIMEOUT=5
 
 is_avd_exists() {
     : '
@@ -85,7 +86,16 @@ close_emulator() {
 }
 
 wait_for_device() {
-    adb -s $1 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+    adb -s $1 wait-for-device
+
+    #echo $1 > temp
+    #timeout --foreground ${WAIT_FOR_DEVICE_TIMEOUT} bash -c 'adb -s "$(<temp)" wait-for-device'
+
+    #echo $1 | timeout --foreground ${WAIT_FOR_DEVICE_TIMEOUT} sh -c 'echo here $1 here;:'
+    #adb -s $1 wait-for-device &
+
+    #echo !!!!!!!!!!!!!!
+    #adb -s $1 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 }
 
 clean_app_data() {
@@ -165,6 +175,13 @@ get_emulator_name() {
         Function which returns a name of the first emulator in the adb devices list
     '
     adb devices | grep emulator | cut -f1
+}
+
+get_emulator_status() {
+    : '
+        Function which returns a status of emulator with given name
+    '
+    adb devices | grep emulator | cut -f2
 }
 
 get_apk_folder_name() {

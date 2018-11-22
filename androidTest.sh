@@ -60,7 +60,7 @@ TMP_PACKAGE_NAME="/data/local/tmp/"
 # timeout which is used for creation of emulator
 LONG_TIMEOUT_SEC=20
 # timeout which is used for launching of reused emulator
-SMALL_TIMEOUT_SEC=5
+SMALL_TIMEOUT_SEC=7
 
 SHELL_SCRIPTS_DIR=`pwd`
 # move to project root dir for building
@@ -100,7 +100,21 @@ fi
 echo "waiting ${CURRENT_TIMEOUT_SEC} seconds..."
 sleep ${CURRENT_TIMEOUT_SEC}
 
+#echo "wait for device"
+#wait_for_device ${EMULATOR_NAME}
+
 EMULATOR_NAME=`get_emulator_name`
+EMULATOR_STATUS=`get_emulator_status`
+adb devices
+
+if [[ ${EMULATOR_STATUS} == "offline" || -z ${EMULATOR_NAME} ]]; then
+    echo "emulator is offline"
+    close_running_emulator
+    create_and_launch_new_emulator
+    echo "waiting ${LONG_TIMEOUT_SEC} seconds..."
+    sleep ${LONG_TIMEOUT_SEC}
+fi
+
 echo "start running tests"
 
 for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
