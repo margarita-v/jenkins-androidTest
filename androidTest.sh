@@ -36,6 +36,16 @@ PROJECT_ROOT_DIR=`pwd`/
  # read params from config file
 . ${SHELL_SCRIPTS_DIR}/avd-config
 
+create_and_launch_new_emulator() {
+    echo "create new emulator"
+    create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
+    launch_concrete_emulator
+}
+
+launch_concrete_emulator() {
+    launch_emulator "$avd_name" "$skin_size" "$stay"
+}
+
 CURRENT_TIMEOUT_SEC=${LONG_TIMEOUT_SEC}
 EMULATOR_NAME=`get_emulator_name`
 
@@ -53,9 +63,7 @@ if [[ ${reuse} == true ]]; then
         fi
         #CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
     else
-        echo "create new emulator"
-        create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
-        launch_emulator "$avd_name" "$skin_size"
+        create_and_launch_new_emulator
     fi
 else
     # close running emulator
@@ -63,9 +71,7 @@ else
         echo "close running emulator"
         close_emulator ${EMULATOR_NAME}
     fi
-    echo "create new emulator"
-    create_avd "$avd_name" "$device_name" "$sdk_id" "$sdcard_size"
-    launch_emulator "$avd_name" "$skin_size"
+    create_and_launch_new_emulator
 fi
 
 sleep ${CURRENT_TIMEOUT_SEC}
@@ -84,18 +90,21 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
     if [[ ${ANDROID_TEST_APK_MODULE_FOLDER} != build ]]; then
         ANDROID_TEST_APK_PREFIX=${ANDROID_TEST_APK_MODULE_FOLDER}
     else
-        ANDROID_TEST_APK_PREFIX=`echo ${ANDROID_TEST_APK_FILE_NAME} | awk -F ${ANDROID_TEST_APK_FILENAME_SUFFIX} '{ print $1 }'`
+        ANDROID_TEST_APK_PREFIX=`echo ${ANDROID_TEST_APK_FILE_NAME} \
+            | awk -F ${ANDROID_TEST_APK_FILENAME_SUFFIX} '{ print $1 }'`
     fi
 
     TEST_REPORT_FOLDER=${ANDROID_TEST_APK_MAIN_FOLDER}
     TEST_REPORT_FILENAME_SUFFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
 
     if [[ ${ANDROID_TEST_APK_MAIN_FOLDER} != ${ANDROID_TEST_APK_PREFIX} ]]; then
-        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}:${ANDROID_TEST_APK_PREFIX}`
+        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=\
+            `get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}:${ANDROID_TEST_APK_PREFIX}`
         TEST_REPORT_FILENAME_SUFFIX+="-$ANDROID_TEST_APK_PREFIX"
         TEST_REPORT_FOLDER+="/$ANDROID_TEST_APK_PREFIX"
     else
-        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}`
+        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=\
+            `get_instrumentation_runner_name ${ANDROID_TEST_APK_MAIN_FOLDER}`
     fi
 
     # find debug apk and test package name
@@ -136,7 +145,8 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
             install_apk ${EMULATOR_NAME} ${TEST_APK_PACKAGE_NAME}
 
             run_instrumental_test ${EMULATOR_NAME} ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
-            pull_test_report ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} "$TEST_REPORT_FOLDER/report-$TEST_REPORT_FILENAME_SUFFIX.xml"
+            pull_test_report ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} \
+                "$TEST_REPORT_FOLDER/report-$TEST_REPORT_FILENAME_SUFFIX.xml"
         fi
     else
         cd ..
@@ -145,6 +155,7 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
 done
 
 close_emulator ${EMULATOR_NAME}
+#todo remove emulator if state=false
 
 rm ${GRADLE_OUTPUT_FILENAME}
 

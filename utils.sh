@@ -49,6 +49,7 @@ launch_emulator() {
         Function for launching emulator
         $1 - name of AVD which will be launched
         $2 - skin size of AVD
+        $3 - flag which shows if emulator needs to save its snapshot state
     '
     # launch emulator in background process
     # emulator -avd "$1" -skin "$2" -no-snapshot-save &
@@ -57,7 +58,13 @@ launch_emulator() {
     # gnome-terminal -x sh -c "emulator -avd '$1' -skin '$2' -no-snapshot-save"
 
     # launch emulator in another terminal window
-    gnome-terminal -e "emulator -avd '$1' -skin '$2' -no-snapshot-save" # todo snapshot is optional
+    if [[ $3 == true ]]; then
+        echo "stay"
+        gnome-terminal -e "emulator -avd '$1' -skin '$2'"
+    else
+        echo "not stay"
+        gnome-terminal -e "emulator -avd '$1' -skin '$2' -no-snapshot-save"
+    fi
 }
 
 close_emulator() {
