@@ -83,12 +83,12 @@ if [[ ${reuse} == true ]]; then
         echo "launch reused emulator"
         # check if emulator is running
         if [[ -z ${EMULATOR_NAME} ]]; then
+            CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
             launch_concrete_emulator
         else
             CURRENT_TIMEOUT_SEC=0
             echo "emulator have been launched already"
         fi
-        CURRENT_TIMEOUT_SEC=${SMALL_TIMEOUT_SEC}
     else
         create_and_launch_new_emulator
     fi
