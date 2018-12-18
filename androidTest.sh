@@ -6,7 +6,6 @@ trap cleanup_on_exit 1 2 3 6
 
 cleanup_on_exit() {
     close_running_emulator
-    remove_report_files
 }
 
 create_and_launch_new_emulator() {
@@ -17,12 +16,6 @@ create_and_launch_new_emulator() {
 
 launch_concrete_emulator() {
     launch_emulator "$avd_name" "$skin_size" "$stay"
-}
-
-remove_report_files() {
-    rm -rf */report*
-    rm -rf template/*/report*
-    rm ${GRADLE_OUTPUT_FILENAME} 2> /dev/null || true
 }
 
 close_running_emulator() {
@@ -41,12 +34,6 @@ close_running_emulator() {
 
 . ./utils.sh --source-only
 
-# name of undefined instrumentation runner for module
-NULL_INSTRUMENTATION_RUNNER_NAME="null"
-
-# name of temporary file for output of gradle task
-GRADLE_OUTPUT_FILENAME="result"
-
 # name of build type which is used for running tests
 TEST_BUILD_TYPE_NAME="debug"
 
@@ -54,13 +41,12 @@ TEST_BUILD_TYPE_NAME="debug"
 ANDROID_TEST_APK_SUFFIX="androidTest"
 ANDROID_TEST_APK_FILENAME_SUFFIX=-${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}.apk
 
-# package name of temporary dir of emulator
-TMP_PACKAGE_NAME="/data/local/tmp/"
+SPOON_JAR_NAME="spoon-runner-1.7.1-jar-with-dependencies.jar"
 
 # timeout which is used for creation of emulator
-LONG_TIMEOUT_SEC=20
+LONG_TIMEOUT_SEC=5
 # timeout which is used for launching of reused emulator
-SMALL_TIMEOUT_SEC=7
+SMALL_TIMEOUT_SEC=5
 
 SHELL_SCRIPTS_DIR=`pwd`
 # move to project root dir for building
@@ -68,7 +54,8 @@ cd ..
 PROJECT_ROOT_DIR=`pwd`/
 
 echo "assemble APK files for instrumental tests"
-./gradlew assembleAndroidTest
+echo ${PROJECT_ROOT_DIR}
+#./gradlew assembleAndroidTest
 
  # read params from config file
 . ${SHELL_SCRIPTS_DIR}/avd-config
@@ -119,32 +106,7 @@ echo "start running tests"
 
 for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
-
     ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
-    ANDROID_TEST_APK_FILE_NAME=`echo ${androidTestApk} | rev | cut -d '/' -f1 | rev`
-
-    # check if project has submodules
-    ANDROID_TEST_APK_MODULE_FOLDER=`echo ${androidTestApk} | cut -d '/' -f2`
-
-    if [[ ${ANDROID_TEST_APK_MODULE_FOLDER} != build ]]; then
-        ANDROID_TEST_APK_PREFIX=${ANDROID_TEST_APK_MODULE_FOLDER}
-    else
-        ANDROID_TEST_APK_PREFIX=`echo ${ANDROID_TEST_APK_FILE_NAME} \
-            | awk -F ${ANDROID_TEST_APK_FILENAME_SUFFIX} '{ print $1 }'`
-    fi
-
-    TEST_REPORT_FOLDER=${ANDROID_TEST_APK_MAIN_FOLDER}
-    TEST_REPORT_FILENAME_SUFFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
-
-    if [[ ${ANDROID_TEST_APK_MAIN_FOLDER} != ${ANDROID_TEST_APK_PREFIX} ]]; then
-        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name \
-            ${ANDROID_TEST_APK_MAIN_FOLDER}:${ANDROID_TEST_APK_PREFIX}`
-        TEST_REPORT_FILENAME_SUFFIX+="-$ANDROID_TEST_APK_PREFIX"
-        TEST_REPORT_FOLDER+="/$ANDROID_TEST_APK_PREFIX"
-    else
-        CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME=`get_instrumentation_runner_name \
-            ${ANDROID_TEST_APK_MAIN_FOLDER}`
-    fi
 
     # find debug apk and test package name
     cd ${ANDROID_TEST_APK_MAIN_FOLDER}
@@ -152,41 +114,25 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
 
     # check if debug apk exists
     if ! [[ -z ${APK_NAME} ]]; then
+        echo ${APK_NAME}
+
         DEBUG_APK_NAME=${ANDROID_TEST_APK_MAIN_FOLDER}/${APK_NAME}
         cd ..
+        pwd
 
-        ./gradlew ${CURRENT_INSTRUMENTATION_RUNNER_GRADLE_TASK_NAME} > ${GRADLE_OUTPUT_FILENAME}
-        CURRENT_INSTRUMENTATION_RUNNER_NAME=`cat ${GRADLE_OUTPUT_FILENAME} | tail -4 | head -1`
+        DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
+        echo ${DEBUG_PACKAGE_NAME}
 
-        # check if testInstrumentationRunnerName is not null for the current module
-        if [[ ${CURRENT_INSTRUMENTATION_RUNNER_NAME} != ${NULL_INSTRUMENTATION_RUNNER_NAME} ]]; then
-            print ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
-
-            TEST_PACKAGE_NAME=`get_package_name_from_apk ${androidTestApk}`
-            print ${TEST_PACKAGE_NAME}
-
-            DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
-            print ${DEBUG_PACKAGE_NAME}
-
-            # clear all app data for previous tests
-            if [[ ${reuse} == true ]]; then
-                # ignore error result code for grep
-                uninstall_apk ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} || true
-            fi
-
-            DEBUG_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${DEBUG_PACKAGE_NAME}
-            TEST_APK_PACKAGE_NAME=${TMP_PACKAGE_NAME}${TEST_PACKAGE_NAME}
-
-            push ${EMULATOR_NAME} ${PROJECT_ROOT_DIR}${DEBUG_APK_NAME} ${DEBUG_APK_PACKAGE_NAME}
-            install_apk ${EMULATOR_NAME} ${DEBUG_APK_PACKAGE_NAME}
-
-            push ${EMULATOR_NAME} ${PROJECT_ROOT_DIR}${androidTestApk} ${TEST_APK_PACKAGE_NAME}
-            install_apk ${EMULATOR_NAME} ${TEST_APK_PACKAGE_NAME}
-
-            run_instrumental_test ${EMULATOR_NAME} ${TEST_PACKAGE_NAME}/${CURRENT_INSTRUMENTATION_RUNNER_NAME}
-            pull_test_report ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} \
-                "$TEST_REPORT_FOLDER/report-$TEST_REPORT_FILENAME_SUFFIX.xml"
+        # clear all app data for previous tests
+        if [[ ${reuse} == true ]]; then
+            # ignore error result code for grep
+            uninstall_apk ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} || true
         fi
+
+        java -jar ${SPOON_JAR_NAME} \
+            --apk ${PROJECT_ROOT_DIR}${DEBUG_APK_NAME} \
+            --test-apk ${PROJECT_ROOT_DIR}${androidTestApk} \
+            -serial ${EMULATOR_NAME}
     else
         cd ..
     fi
@@ -194,16 +140,3 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
 done
 
 close_running_emulator
-
-rm ${GRADLE_OUTPUT_FILENAME}
-
-#todo temporary using
-print_results() {
-    cat */report* | grep "$1" && cat template/*/report* | grep "$1"
-    print_line
-}
-
-print_results "<testcase name="
-print_results "failures="
-
-remove_report_files

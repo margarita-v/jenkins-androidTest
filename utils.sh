@@ -68,10 +68,10 @@ launch_emulator() {
     # launch emulator in another terminal window
     if [[ $3 == true ]]; then
         echo "stay"
-        xterm -e emulator -avd "$1" -skin "$2" &
+        xterm -e emulator -avd "$1" -skin "$2" -no-boot-anim &
     else
         echo "not stay"
-        xterm -e emulator -avd "$1" -skin "$2" -no-snapshot-save &
+        xterm -e emulator -avd "$1" -skin "$2" -no-boot-anim -no-snapshot-save &
     fi
 }
 
