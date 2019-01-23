@@ -47,6 +47,8 @@ SPOON_JAR_NAME="spoon-runner-1.7.1-jar-with-dependencies.jar"
 LONG_TIMEOUT_SEC=5
 # timeout which is used for launching of reused emulator
 SMALL_TIMEOUT_SEC=5
+# timeout for execution per test (in seconds)
+TIMEOUT_PER_TEST=300
 
 SHELL_SCRIPTS_DIR=`pwd`
 # move to project root dir for building
@@ -132,6 +134,8 @@ for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
         java -jar ${SPOON_JAR_NAME} \
             --apk ${PROJECT_ROOT_DIR}${DEBUG_APK_NAME} \
             --test-apk ${PROJECT_ROOT_DIR}${androidTestApk} \
+            --adb-timeout ${TIMEOUT_PER_TEST} \
+            --debug --fail-on-failure --grant-all \
             -serial ${EMULATOR_NAME}
     else
         cd ..
