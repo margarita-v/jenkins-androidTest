@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+#set -e
 
 # register actions which must be performed on any errors
 trap cleanup_on_exit 1 2 3 6
@@ -109,6 +109,8 @@ disable_animations ${EMULATOR_NAME}
 
 echo "start running tests"
 
+FAILED_TESTS=""
+
 for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
     APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
@@ -146,7 +148,7 @@ for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_S
 
             SPOON_OUTPUT_DIR="${PROJECT_ROOT_DIR}/${TEST_REPORT_FILE_NAME_SUFFIX}/spoon-output"
             mkdir -p ${SPOON_OUTPUT_DIR}
-            
+
             # clear all app data for previous tests
             if [[ ${reuse} == true ]]; then
                 DEBUG_APK_NAME=${APK_MAIN_FOLDER}/${APK_NAME}
@@ -162,11 +164,21 @@ for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_S
                 --test-apk ${PROJECT_ROOT_DIR}${androidTestApk} \
                 --output ${SPOON_OUTPUT_DIR} \
                 --adb-timeout ${TIMEOUT_PER_TEST} \
-                --debug --grant-all \
+                --debug --fail-on-failure --grant-all \
                 -serial ${EMULATOR_NAME}
+
+            if ! [[ $? == 0 ]]; then
+                FAILED_TESTS="${FAILED_TESTS} $APK_MODULE_NAME"
+            fi
         fi
     fi
     print_line
 done
+
+if ! [[ -z ${APK_NAME} ]]; then
+    echo "all tests passed"
+else
+    echo ${FAILED_TESTS}
+fi
 
 close_running_emulator
