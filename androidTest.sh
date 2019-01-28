@@ -48,7 +48,7 @@ LONG_TIMEOUT_SEC=15
 # timeout which is used for launching of reused emulator
 SMALL_TIMEOUT_SEC=5
 # timeout for execution per test (in seconds)
-TIMEOUT_PER_TEST=300
+TIMEOUT_PER_TEST=60
 
 SHELL_SCRIPTS_DIR=`pwd`
 # move to project root dir for building
@@ -104,12 +104,14 @@ if [[ ${EMULATOR_STATUS} == "offline" || -z ${EMULATOR_NAME} ]]; then
     sleep ${LONG_TIMEOUT_SEC}
 fi
 
+echo "disable animations"
+disable_animations ${EMULATOR_NAME}
+
 echo "start running tests"
 
 for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
     ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
-    echo ANDROID_TEST_APK_MAIN_FOLDER ${ANDROID_TEST_APK_MAIN_FOLDER}
 
     APK_MODULE_NAME=`echo ${androidTestApk} | cut -d '/' -f2`
     APK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
@@ -120,15 +122,11 @@ for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_S
         APK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
     fi
 
-    echo APK_PREFIX ${APK_PREFIX}
-
     GRADLE_TASK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
 
     if ! [[ ${ANDROID_TEST_APK_MAIN_FOLDER} == ${APK_PREFIX} ]]; then
         GRADLE_TASK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}:${APK_PREFIX}
     fi
-
-    echo GRADLE_TASK_PREFIX ${GRADLE_TASK_PREFIX}
 
     # find debug apk and test package name
 

@@ -170,6 +170,25 @@ run_instrumental_test() {
     adb -s $1 shell am instrument -w -r -e debug false -e listener ${INSTRUMENTATION_RUNNER_LISTENER_NAME} $2
 }
 
+disable_animations() {
+    : '
+        Function for disabling animations on emulator
+        $1 - emulator name
+    '
+    ADB_SETTINGS_COMMAND=`get_adb_settings_command $1`
+    eval "${ADB_SETTINGS_COMMAND} window_animation_scale 0 &"
+    eval "${ADB_SETTINGS_COMMAND} transition_animation_scale 0 &"
+    eval "${ADB_SETTINGS_COMMAND} animator_duration_scale 0 &"
+}
+
+get_adb_settings_command() {
+    : '
+        Function which returns a command for ADB settings usage
+        $1 - emulator name
+    '
+    echo "adb -s ${1} shell settings put global"
+}
+
 get_emulator_name() {
     : '
         Function which returns a name of the first emulator in the adb devices list
