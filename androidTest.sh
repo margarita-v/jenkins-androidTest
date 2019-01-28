@@ -111,26 +111,28 @@ echo "start running tests"
 
 for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
-    ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
+    APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
 
     APK_MODULE_NAME=`echo ${androidTestApk} | cut -d '/' -f2`
-    APK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
+    APK_PREFIX=${APK_MAIN_FOLDER}
+    TEST_REPORT_FILE_NAME_SUFFIX=${APK_MAIN_FOLDER}
 
     if ! [[ ${APK_MODULE_NAME} == "build" ]]; then
         APK_PREFIX=${APK_MODULE_NAME}
     else
-        APK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
+        APK_PREFIX=${APK_MAIN_FOLDER}
     fi
 
-    GRADLE_TASK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
+    GRADLE_TASK_PREFIX=${APK_MAIN_FOLDER}
 
-    if ! [[ ${ANDROID_TEST_APK_MAIN_FOLDER} == ${APK_PREFIX} ]]; then
-        GRADLE_TASK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}:${APK_PREFIX}
+    if ! [[ ${APK_MAIN_FOLDER} == ${APK_PREFIX} ]]; then
+        GRADLE_TASK_PREFIX=${APK_MAIN_FOLDER}:${APK_PREFIX}
+        TEST_REPORT_FILE_NAME_SUFFIX=${TEST_REPORT_FILE_NAME_SUFFIX}-${APK_PREFIX}
     fi
 
     # find debug apk and test package name
 
-    APK_NAME=`find ${ANDROID_TEST_APK_MAIN_FOLDER} -name "*-${TEST_BUILD_TYPE_NAME}*.apk" \
+    APK_NAME=`find ${APK_MAIN_FOLDER} -name "*-${TEST_BUILD_TYPE_NAME}*.apk" \
         ! -name "*-unsigned.apk" ! -name "*-${ANDROID_TEST_APK_SUFFIX}.apk"`
 
     # check if debug apk exists
@@ -142,9 +144,12 @@ for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_S
         if ! [[ ${CURRENT_INSTRUMENTATION_RUNNER_NAME} == "null" ]]; then
             echo ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
 
+            SPOON_OUTPUT_DIR="${PROJECT_ROOT_DIR}/${TEST_REPORT_FILE_NAME_SUFFIX}/spoon-output"
+            mkdir -p ${SPOON_OUTPUT_DIR}
+            
             # clear all app data for previous tests
             if [[ ${reuse} == true ]]; then
-                DEBUG_APK_NAME=${ANDROID_TEST_APK_MAIN_FOLDER}/${APK_NAME}
+                DEBUG_APK_NAME=${APK_MAIN_FOLDER}/${APK_NAME}
                 DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
                 echo ${DEBUG_PACKAGE_NAME}
 
@@ -155,8 +160,9 @@ for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_S
             java -jar ${SPOON_JAR_NAME} \
                 --apk ${PROJECT_ROOT_DIR}${APK_NAME} \
                 --test-apk ${PROJECT_ROOT_DIR}${androidTestApk} \
+                --output ${SPOON_OUTPUT_DIR} \
                 --adb-timeout ${TIMEOUT_PER_TEST} \
-                --debug --fail-on-failure --grant-all \
+                --debug --grant-all \
                 -serial ${EMULATOR_NAME}
         fi
     fi
