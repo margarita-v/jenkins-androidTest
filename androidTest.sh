@@ -44,7 +44,7 @@ ANDROID_TEST_APK_FILENAME_SUFFIX=-${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUF
 SPOON_JAR_NAME="spoon-runner-1.7.1-jar-with-dependencies.jar"
 
 # timeout which is used for creation of emulator
-LONG_TIMEOUT_SEC=5
+LONG_TIMEOUT_SEC=15
 # timeout which is used for launching of reused emulator
 SMALL_TIMEOUT_SEC=5
 # timeout for execution per test (in seconds)
@@ -106,7 +106,7 @@ fi
 
 echo "start running tests"
 
-for androidTestApk in `get_apk_list ${ANDROID_TEST_APK_SUFFIX}`; do
+for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
     ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
 

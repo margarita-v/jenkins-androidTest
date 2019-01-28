@@ -49,7 +49,7 @@ delete_avd() {
     : '
         Function for removing the AVD with given params
     '
-    avdmanager delete avd -n "$1"
+    avdmanager delete avd -n "$1" || true
 }
 
 launch_emulator() {
