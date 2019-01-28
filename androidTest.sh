@@ -109,36 +109,58 @@ echo "start running tests"
 for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_SUFFIX}`; do
     print ${androidTestApk}
     ANDROID_TEST_APK_MAIN_FOLDER=`get_apk_folder_name ${androidTestApk}`
+    echo ANDROID_TEST_APK_MAIN_FOLDER ${ANDROID_TEST_APK_MAIN_FOLDER}
+
+    APK_MODULE_NAME=`echo ${androidTestApk} | cut -d '/' -f2`
+    APK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
+
+    if ! [[ ${APK_MODULE_NAME} == "build" ]]; then
+        APK_PREFIX=${APK_MODULE_NAME}
+    else
+        APK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
+    fi
+
+    echo APK_PREFIX ${APK_PREFIX}
+
+    GRADLE_TASK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}
+
+    if ! [[ ${ANDROID_TEST_APK_MAIN_FOLDER} == ${APK_PREFIX} ]]; then
+        GRADLE_TASK_PREFIX=${ANDROID_TEST_APK_MAIN_FOLDER}:${APK_PREFIX}
+    fi
+
+    echo GRADLE_TASK_PREFIX ${GRADLE_TASK_PREFIX}
 
     # find debug apk and test package name
-    cd ${ANDROID_TEST_APK_MAIN_FOLDER}
-    APK_NAME=`get_apk_list ${TEST_BUILD_TYPE_NAME}`
+
+    APK_NAME=`find ${ANDROID_TEST_APK_MAIN_FOLDER} -name "*-${TEST_BUILD_TYPE_NAME}*.apk" \
+        ! -name "*-unsigned.apk" ! -name "*-${ANDROID_TEST_APK_SUFFIX}.apk"`
 
     # check if debug apk exists
     if ! [[ -z ${APK_NAME} ]]; then
         echo ${APK_NAME}
 
-        DEBUG_APK_NAME=${ANDROID_TEST_APK_MAIN_FOLDER}/${APK_NAME}
-        cd ..
-        pwd
+        CURRENT_INSTRUMENTATION_RUNNER_NAME=`./gradlew ":${GRADLE_TASK_PREFIX}:printTestInstrumentationRunnerName" | tail -4 | head -1`
 
-        DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
-        echo ${DEBUG_PACKAGE_NAME}
+        if ! [[ ${CURRENT_INSTRUMENTATION_RUNNER_NAME} == "null" ]]; then
+            echo ${CURRENT_INSTRUMENTATION_RUNNER_NAME}
 
-        # clear all app data for previous tests
-        if [[ ${reuse} == true ]]; then
-            # ignore error result code for grep
-            uninstall_apk ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} || true
+            # clear all app data for previous tests
+            if [[ ${reuse} == true ]]; then
+                DEBUG_APK_NAME=${ANDROID_TEST_APK_MAIN_FOLDER}/${APK_NAME}
+                DEBUG_PACKAGE_NAME=`get_package_name_from_apk ${DEBUG_APK_NAME}`
+                echo ${DEBUG_PACKAGE_NAME}
+
+                # ignore error result code for grep
+                uninstall_apk ${EMULATOR_NAME} ${DEBUG_PACKAGE_NAME} || true
+            fi
+
+            java -jar ${SPOON_JAR_NAME} \
+                --apk ${PROJECT_ROOT_DIR}${APK_NAME} \
+                --test-apk ${PROJECT_ROOT_DIR}${androidTestApk} \
+                --adb-timeout ${TIMEOUT_PER_TEST} \
+                --debug --fail-on-failure --grant-all \
+                -serial ${EMULATOR_NAME}
         fi
-
-        java -jar ${SPOON_JAR_NAME} \
-            --apk ${PROJECT_ROOT_DIR}${DEBUG_APK_NAME} \
-            --test-apk ${PROJECT_ROOT_DIR}${androidTestApk} \
-            --adb-timeout ${TIMEOUT_PER_TEST} \
-            --debug --fail-on-failure --grant-all \
-            -serial ${EMULATOR_NAME}
-    else
-        cd ..
     fi
     print_line
 done
