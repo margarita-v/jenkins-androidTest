@@ -102,6 +102,7 @@ if [[ ${EMULATOR_STATUS} == "offline" || -z ${EMULATOR_NAME} ]]; then
     create_and_launch_new_emulator
     echo "waiting ${LONG_TIMEOUT_SEC} seconds..."
     sleep ${LONG_TIMEOUT_SEC}
+    EMULATOR_NAME=`get_emulator_name`
 fi
 
 echo "disable animations"
@@ -168,14 +169,14 @@ for androidTestApk in `get_apk_list ${TEST_BUILD_TYPE_NAME}-${ANDROID_TEST_APK_S
                 -serial ${EMULATOR_NAME}
 
             if ! [[ $? == 0 ]]; then
-                FAILED_TESTS="${FAILED_TESTS} $APK_MODULE_NAME"
+                FAILED_TESTS="${FAILED_TESTS} ${APK_MAIN_FOLDER}"
             fi
         fi
     fi
     print_line
 done
 
-if ! [[ -z ${APK_NAME} ]]; then
+if [[ -z ${FAILED_TESTS} ]]; then
     echo "all tests passed"
 else
     echo ${FAILED_TESTS}

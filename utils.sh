@@ -67,11 +67,9 @@ launch_emulator() {
 
     # launch emulator in another terminal window
     if [[ $3 == true ]]; then
-        echo "stay"
-        xterm -e emulator -avd "$1" -skin "$2" -no-boot-anim &
+        gnome-terminal -x sh -c "emulator -avd "$1" -netdelay none -netspeed full -no-window"
     else
-        echo "not stay"
-        xterm -e emulator -avd "$1" -skin "$2" -no-boot-anim -no-snapshot-save &
+        gnome-terminal -x sh -c "emulator -avd "$1" -netdelay none -netspeed full -no-window -no-snapshot-save"
     fi
 }
 
