@@ -1,0 +1,43 @@
+2019-01-31 18:34:13 [SR.runTests] Executing instrumentation suite on 1 device(s).
+2019-01-31 18:34:13 [SR.runTests] Application: ru.surfstudio.android.mvpwidget.sample from /Users/margarita/AndroidStudioProjects/android-standard/mvp-widget-sample/build/outputs/apk/debug/mvp-widget-sample-debug.apk
+2019-01-31 18:34:13 [SR.runTests] Instrumentation: ru.surfstudio.android.mvpwidget.sample.test from /Users/margarita/AndroidStudioProjects/android-standard/mvp-widget-sample/build/outputs/apk/androidTest/debug/mvp-widget-sample-debug-androidTest.apk
+2019-01-31 18:34:13 [SR.runTests] [emulator-5554] Starting execution.
+2019-01-31 18:34:13 [SDR.run] InstrumentationInfo: [com.squareup.spoon.SpoonInstrumentationInfo@1ef7fe8e[applicationPackage=ru.surfstudio.android.mvpwidget.sample,minSdkVersion=18,instrumentationPackage=ru.surfstudio.android.mvpwidget.sample.test,testRunnerClass=androidx.test.runner.AndroidJUnitRunner]]
+2019-01-31 18:34:13 [SDR.run] Got realDevice for [emulator-5554]
+2019-01-31 18:34:13 [SDR.run] [emulator-5554] setDeviceDetails com.squareup.spoon.DeviceDetails@5c0369c4[model=Android SDK built for x86,manufacturer=Google,version=9,apiLevel=28,language=<null>,region=<null>,isEmulator=true,avdName=avd-androidTest]
+06:34:13 D/mvp-widget-sample-debug.apk: Uploading mvp-widget-sample-debug.apk onto device 'emulator-5554'
+06:34:13 D/Device: Uploading file onto device 'emulator-5554'
+06:34:16 D/mvp-widget-sample-debug-androidTest.apk: Uploading mvp-widget-sample-debug-androidTest.apk onto device 'emulator-5554'
+06:34:16 D/Device: Uploading file onto device 'emulator-5554'
+2019-01-31 18:34:17 [SDR.run] About to actually run tests for [emulator-5554]
+06:34:17 I/RemoteAndroidTest: Running am instrument -w -r   ru.surfstudio.android.mvpwidget.sample.test/androidx.test.runner.AndroidJUnitRunner on avd-androidTest [emulator-5554]
+2019-01-31 18:34:22 [STRL.testRunStarted] testCount=4 runName=ru.surfstudio.android.mvpwidget.sample.test
+2019-01-31 18:34:22 [STRL.testStarted] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testClickInRecyclerView
+2019-01-31 18:34:26 [STRL.testEnded] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testClickInRecyclerView
+2019-01-31 18:34:27 [STRL.testStarted] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testClickOnWidget
+2019-01-31 18:34:31 [STRL.testEnded] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testClickOnWidget
+2019-01-31 18:34:31 [STRL.testStarted] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testOpenRecyclerView
+2019-01-31 18:34:33 [STRL.testEnded] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testOpenRecyclerView
+2019-01-31 18:34:34 [STRL.testStarted] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testOpenFragment
+2019-01-31 18:34:36 [STRL.testEnded] test=ru.surfstudio.android.mvpwidget.sample.MvpWidgetSampleTest#testOpenFragment
+06:34:38 D/InstrumentationResultParser: unrecognized line onError: commandError=false message=INSTRUMENTATION_ABORTED: System has crashed.
+06:34:38 D/InstrumentationResultParser: unrecognized line INSTRUMENTATION_ABORTED: System has crashed.
+2019-01-31 18:34:38 [STRL.testRunEnded] elapsedTime=0
+06:34:38 I/XmlResultReporter: XML test result file generated at /Users/margarita/AndroidStudioProjects/android-standard/mvp-widget-sample/spoon-output/junit-reports/emulator-5554.xml. Total tests 4, passed 4, 
+2019-01-31 18:34:38 [SDR.run] About to grab screenshots and prepare output for [emulator-5554]
+2019-01-31 18:34:38 [SDR.pullDirectory] Internal path is /data/data/ru.surfstudio.android.mvpwidget.sample/app_spoon-screenshots
+2019-01-31 18:34:38 [SDR.pullDirectory] External path is /sdcard/app_spoon-screenshots
+2019-01-31 18:34:38 [SDR.pullDirectory] Pulling files from external dir on [emulator-5554]
+2019-01-31 18:34:38 [SDR.pullDirectory] Pulling files from internal dir on [emulator-5554]
+2019-01-31 18:34:38 [SDR.pullDirectory] Done pulling app_spoon-screenshots from on [emulator-5554]
+2019-01-31 18:34:38 [SDR.pullDirectory] Internal path is /data/data/ru.surfstudio.android.mvpwidget.sample/app_spoon-files
+2019-01-31 18:34:38 [SDR.pullDirectory] External path is /sdcard/app_spoon-files
+2019-01-31 18:34:38 [SDR.pullDirectory] Pulling files from external dir on [emulator-5554]
+2019-01-31 18:34:39 [SDR.pullDirectory] Pulling files from internal dir on [emulator-5554]
+2019-01-31 18:34:39 [SDR.pullDirectory] Done pulling app_spoon-files from on [emulator-5554]
+2019-01-31 18:34:39 [SDR.handleImages] Moving screenshots to the image folder on [emulator-5554]
+2019-01-31 18:34:39 [SDR.handleImages] Generating animated gifs for [emulator-5554]
+2019-01-31 18:34:39 [SDR.handleFiles] Found class name dirs: []
+2019-01-31 18:34:39 [SDR.run] Done running for [emulator-5554]
+2019-01-31 18:34:39 [SR.runTests] [emulator-5554] Execution done.
+06:34:41 D/ddms: Waiting for Monitor thread

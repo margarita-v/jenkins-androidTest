@@ -1,7 +1,7 @@
 avd_name="avd-androidTest"
 device_name="Nexus 5X"
 sdk_id="system-images;android-28;google_apis;x86"
-sdcard_size="3072M"
+sdcard_size="2048M"
 skin_size="1440x2560"
 skin_name="nexus_5x"
 reuse=false
