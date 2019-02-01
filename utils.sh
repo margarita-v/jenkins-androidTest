@@ -66,11 +66,8 @@ launch_emulator() {
     # gnome-terminal -x sh -c "emulator -avd '$1' -skin '$2' -no-snapshot-save"
 
     # launch emulator in another terminal window
-    if [[ $3 == true ]]; then
-        gnome-terminal -x sh -c "emulator -avd "$1" -netdelay none -netspeed full -no-window"
-    else
-        gnome-terminal -x sh -c "emulator -avd "$1" -netdelay none -netspeed full -no-window -no-snapshot-save"
-    fi
+    gnome-terminal -x sh -c "emulator -avd "$1" -no-boot-anim -netfast -noaudio -accel on \
+        -no-window -gpu swiftshader_indirect -no-snapshot-save"
 }
 
 close_emulator() {
